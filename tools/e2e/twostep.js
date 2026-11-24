@@ -2,12 +2,12 @@
 const { chromium } = require('playwright');
 const { generate } = require('otplib');
 const BASE = process.env.BASE || 'http://localhost:3100';
-const WHO = process.env.WHO || 'sam@folio.local';
+const WHO = process.env.WHO || 'sam@soloflow.local';
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
   const p = await (await b.newContext({ viewport: { width: 1280, height: 1000 } })).newPage();
   const logs = []; p.on('pageerror', (e) => logs.push('pageerror ' + e.message));
-  const signin = async () => { await p.goto(BASE + '/signin'); await p.fill('input[name=email]', WHO); await p.fill('input[name=password]', 'folio-demo'); await Promise.all([p.waitForNavigation(), p.click('button[type=submit]')]); };
+  const signin = async () => { await p.goto(BASE + '/signin'); await p.fill('input[name=email]', WHO); await p.fill('input[name=password]', 'soloflow-demo'); await Promise.all([p.waitForNavigation(), p.click('button[type=submit]')]); };
   await signin();
   await p.goto(BASE + '/profile', { waitUntil: 'networkidle' });
   await p.click('button:has-text("Set up")'); await p.waitForTimeout(1200);

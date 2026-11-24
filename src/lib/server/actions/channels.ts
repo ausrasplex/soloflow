@@ -39,7 +39,7 @@ export const channelActions: Record<string, Action> = {
     need(await outsideAllowed(service), 'The server admin has turned off outside services.');
     const enc0 = await configOf(u.id, service, p.config || {});
     const cfg = Object.fromEntries(Object.entries(enc0).map(([k, v]) => [k, isSecret(k) ? dec(v) : v])) as Record<string, string>;
-    try { await sendTo(service, cfg, { title: 'Folio test message', text: 'Alerts from Folio will arrive here.', amountsText: 'Alerts from Folio will arrive here, with amounts like $1,234.' }, !!p.amounts); }
+    try { await sendTo(service, cfg, { title: 'SoloFlow test message', text: 'Alerts from SoloFlow will arrive here.', amountsText: 'Alerts from SoloFlow will arrive here, with amounts like $1,234.' }, !!p.amounts); }
     catch (e) { need(false, 'The test did not go through. ' + (e instanceof Error ? e.message : '')); }
     return { ok: true };
   }

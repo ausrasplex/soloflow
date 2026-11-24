@@ -1,0 +1,17 @@
+{
+  "bank": "Example Bank",
+  "acct": "000-000 1234 5678",
+  "start": "01/09/2026",
+  "end": "30/09/2026",
+  "opening": 5200.00,
+  "rows": [
+    { "date": "02/09/2026", "desc": "Invoice 1042 Smith Builders", "credit": 4180.00 },
+    { "date": "04/09/2026", "desc": "Bunnings Warehouse", "debit": 312.45 },
+    { "date": "06/09/2026", "desc": "Shell Coles Express", "debit": 96.10 },
+    { "date": "08/09/2026", "desc": "Middys Electrical", "debit": 1240.00 },
+    { "date": "12/09/2026", "desc": "Telstra business", "debit": 89.00 },
+    { "date": "17/09/2026", "desc": "Invoice 1043 Harbour Strata", "credit": 6930.00 },
+    { "date": "25/09/2026", "desc": "Drawings to personal", "debit": 2500.00 },
+    { "date": "28/09/2026", "desc": "Monthly account fee", "debit": 10.00 }
+  ]
+}

@@ -3,7 +3,7 @@ import { db } from './db';
 import { dec, enc, sha256, token } from './crypto';
 
 export async function newSecret() { return generateSecret(); }
-export function otpUri(secret: string, email: string) { return generateURI({ secret, label: email, issuer: 'Folio' }); }
+export function otpUri(secret: string, email: string) { return generateURI({ secret, label: email, issuer: 'SoloFlow' }); }
 
 export async function checkCode(secret: string, code: string) {
   if (!/^\d{6}$/.test(code)) return false;

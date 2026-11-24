@@ -59,7 +59,7 @@ class Screen extends DCBase {
   }
 
   flash(msg) { this.setState({ toast: msg }); try { clearTimeout(this._tt); } catch (e) {} this._tt = setTimeout(() => this.setState({ toast: '' }), 3200); }
-  shared() { return { banks: this.data.banks || [], brokers: this.data.brokers || [] }; }
+  shared() { return { banks: this.data.banks || [] }; }
   bankByName(d, name) { return d.banks.find((l) => l.name === name) || { name, icon: '', logo: '', website: '', phone: '', email: '', note: '' }; }
   iconBox(l, slot, size) {
     const s = size || 48;

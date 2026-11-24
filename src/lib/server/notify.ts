@@ -26,7 +26,7 @@ export async function sendTo(service: string, cfg: Record<string, string>, m: Ms
   switch (service) {
     case 'discord':
       if (cfg.mode === 'bot') return post('https://discord.com/api/v10/channels/' + encodeURIComponent(cfg.channel) + '/messages', { content: '**' + m.title + '**\n' + text + (m.url ? '\n' + m.url : '') }, { authorization: 'Bot ' + cfg.token });
-      return post(cfg.url, { username: 'Folio', content: '**' + m.title + '**\n' + text + (m.url ? '\n' + m.url : '') });
+      return post(cfg.url, { username: 'SoloFlow', content: '**' + m.title + '**\n' + text + (m.url ? '\n' + m.url : '') });
     case 'telegram':
       return post('https://api.telegram.org/bot' + cfg.token + '/sendMessage', { chat_id: cfg.chat, text: full });
     case 'ntfy':
@@ -39,7 +39,7 @@ export async function sendTo(service: string, cfg: Record<string, string>, m: Ms
     }
     case 'webhook': {
       const body = JSON.stringify({ title: m.title, text, url: m.url || null, at: new Date().toISOString() });
-      return post(cfg.url, body, cfg.secret ? { 'x-folio-signature': createHmac('sha256', cfg.secret).update(body).digest('hex') } : {});
+      return post(cfg.url, body, cfg.secret ? { 'x-soloflow-signature': createHmac('sha256', cfg.secret).update(body).digest('hex') } : {});
     }
   }
   throw new Error('Unknown service');

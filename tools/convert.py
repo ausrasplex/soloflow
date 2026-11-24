@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
-"""Turn the approved mockup boards (docs/mockup/*.dc.html) into React screens (src/screens/*.jsx).
+"""Turn an approved mockup board (docs/mockup/<Name>.dc.html) into a React screen beside its page.
 
-The markup is converted to JSX; the board's logic class becomes a React class component.
-Run:  npm run screens   (or python3 tools/convert.py)
-This was run once to start the app; the screens in src/screens are now maintained by hand
-(tools/common.py applied the shared changes: real household, avatar, alerts, sign-out).
+The markup is converted to JSX; the board's logic class becomes a React class component. The shared frame
+(side navigation, top bar, alerts and footer) is drawn once by src/app/(app)/layout.tsx, so it is stripped from
+the converted screen when the board includes it. A page.tsx is written next to the screen if there is none yet.
+
+Run:  python3 tools/convert.py Name [Name ...]
+Add new screens to SCREENS (board name -> route folder under src/app/(app)) and ROUTES (board name -> URL).
+Screens reused from Folio were converted once and are now maintained by hand; do not re-run them.
 """
 import html, json, os, re, sys
 from html.parser import HTMLParser
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'docs', 'mockup')
-OUT = os.path.join(ROOT, 'src', 'screens')
-SCREENS = ['Loans', 'Main', 'Setup', 'Accounts', 'AddAccount', 'Statements', 'Layouts', 'Lenders', 'Brokers', 'Settings', 'Profile']
-ROUTES = {'Loans': '/loans', 'Main': '/loan', 'Setup': '/loans/new', 'NewLoan': '/loan', 'Accounts': '/accounts', 'AddAccount': '/accounts/new',
-          'Statements': '/statements', 'Settings': '/settings', 'Profile': '/profile', 'Lenders': '/settings', 'Brokers': '/settings', 'Layouts': '/settings'}
+APP = os.path.join(ROOT, 'src', 'app', '(app)')
+# board name -> route folder under src/app/(app). Only new screens belong here.
+SCREENS = {}
+ROUTES = {'Dashboard': '/dashboard', 'Accounts': '/accounts', 'AddAccount': '/accounts/new', 'Statements': '/statements', 'Settings': '/settings',
+          'Profile': '/profile', 'Banks': '/settings', 'Layouts': '/settings'}
+NOTIF = '{(v.notifsOpen) ? (<><div onClick={v.toggleNotifs} style={css("position:fixed;inset:0;z-index:19")}></div></>) : null}'
 VOID = {'input', 'img', 'br', 'hr', 'meta', 'link', 'path', 'circle', 'line', 'rect', 'polyline', 'polygon', 'ellipse', 'stop', 'use'}
 ATTR_MAP = {'class': 'className', 'for': 'htmlFor', 'tabindex': 'tabIndex', 'readonly': 'readOnly', 'maxlength': 'maxLength',
             'autocomplete': 'autoComplete', 'inputmode': 'inputMode', 'autofocus': 'autoFocus', 'spellcheck': 'spellCheck',
@@ -202,6 +207,26 @@ class Conv:
         return ''.join(self.node(k, scope, depth) for k in n.kids)
 
 
+def strip_frame(jsx):
+    """Removes the shell, side navigation, top bar and footer a board draws, keeping only the page content."""
+    m = re.search(r'<div className=(?:"shell"|\{`shell \$\{v\.embCls \?\? ""\}`\})', jsx)
+    if not m or '</header>' not in jsx[m.start():]:
+        return jsx
+    emb = 'embCls' in m.group(0)
+    te = jsx.index('</header>', m.start()) + len('</header>')
+    after = jsx[te:]
+    if after.startswith(NOTIF):
+        after = after[len(NOTIF):]
+    fs = after.rfind('<footer')
+    if fs < 0:
+        return jsx
+    fe = after.index('</footer>', fs) + len('</footer>')
+    rest = after[fe:]
+    if not rest.startswith('</div></div>'):
+        raise SystemExit('the board frame does not close as expected; strip it by hand')
+    return jsx[:m.start()] + ('<div className={v.embCls}>' if emb else '') + after[:fs] + ('</div>' if emb else '') + rest[len('</div></div>'):]
+
+
 def convert(name):
     src = open(os.path.join(SRC, name + '.dc.html'), encoding='utf-8').read()
     xdc = src[src.index('<x-dc>'):src.index('</x-dc>') + len('</x-dc>')]
@@ -210,7 +235,7 @@ def convert(name):
     p = P()
     p.feed(markup)
     c = Conv()
-    jsx = c.node(p.root, {})
+    jsx = strip_frame(c.node(p.root, {}))
     script = re.search(r'<script type="text/x-dc"[^>]*>(.*?)</script>', src, re.S).group(1)
     script = script.replace('class Component extends DCLogic {', 'class Screen extends DCBase {', 1)
     script = re.sub(r"'([A-Za-z]+\.dc\.html(?:#[^']*)?)'", lambda m: json.dumps(route(m.group(1))).replace('"', "'"), script)
@@ -219,8 +244,8 @@ def convert(name):
     render = '\n  render() {\n    const v = Object.assign({}, this.renderVals(), this.common());\n    return (<>\n<style>{SCREEN_CSS}</style>\n' + jsx + '\n</>);\n  }\n'
     script = script[:end] + render + script[end:]
     imports = ''.join("import %sScreen from './%s';\n" % (i, i) for i in sorted(c.imports))
-    out = ("'use client';\n// Generated from docs/mockup/%s.dc.html by tools/convert.py, then tools/patches/%s.py. Do not edit by hand.\n"
-           "/* eslint-disable */\n// @ts-nocheck\nimport React from 'react';\nimport { DCBase, css, R } from '../lib/dc';\n%s\n"
+    out = ("'use client';\n// Generated from docs/mockup/%s.dc.html by tools/convert.py, then tools/patches/%s.py.\n"
+           "/* eslint-disable */\n// @ts-nocheck\nimport React from 'react';\nimport { DCBase, css, R } from '@/lib/dc';\n%s\n"
            "const SCREEN_CSS = %s;\n\n%s\n\nexport default Screen;\n") % (name, name, imports, json.dumps(css), script.strip())
     patch = os.path.join(ROOT, 'tools', 'patches', name + '.py')
     if os.path.exists(patch):
@@ -232,12 +257,18 @@ def convert(name):
             out = out.replace(old, new, 1 if not ns.get('ALL') else -1)
         if 'post' in ns:
             out = ns['post'](out)
-    os.makedirs(OUT, exist_ok=True)
-    open(os.path.join(OUT, name + '.jsx'), 'w', encoding='utf-8').write(out)
+    if name not in SCREENS:
+        raise SystemExit('Add %s to SCREENS (its route folder) first.' % name)
+    folder = os.path.join(APP, SCREENS[name])
+    os.makedirs(folder, exist_ok=True)
+    open(os.path.join(folder, name + '.jsx'), 'w', encoding='utf-8').write(out)
+    page = os.path.join(folder, 'page.tsx')
+    if not os.path.exists(page):
+        open(page, 'w', encoding='utf-8').write("import %s from './%s';\n\nexport default function Page() {\n  return <%s />;\n}\n" % (name, name, name))
     return len(out)
 
 
 if __name__ == '__main__':
-    names = sys.argv[1:] or SCREENS
+    names = sys.argv[1:] or list(SCREENS)
     for n in names:
         print(n, convert(n))

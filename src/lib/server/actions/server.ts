@@ -31,14 +31,14 @@ export const serverActions: Record<string, Action> = {
   checkUpdate: async (c) => {
     admin(c);
     const url = process.env.SOLOFLOW_UPDATE_URL;
-    if (!url) return { text: 'Folio ' + APP_VERSION + ' is installed. Update checks are off because SOLOFLOW_UPDATE_URL is not set.' };
+    if (!url) return { text: 'SoloFlow ' + APP_VERSION + ' is installed. Update checks are off because SOLOFLOW_UPDATE_URL is not set.' };
     try {
       const r = await fetch(url, { signal: AbortSignal.timeout(8000) }); const j = await r.json();
       const latest = String(j.version || j.tag_name || '').replace(/^v/, '');
-      return { text: latest && latest !== APP_VERSION ? 'Folio ' + latest + ' is available. You have ' + APP_VERSION + '.' : 'Folio ' + APP_VERSION + ' is the latest version.' };
+      return { text: latest && latest !== APP_VERSION ? 'SoloFlow ' + latest + ' is available. You have ' + APP_VERSION + '.' : 'SoloFlow ' + APP_VERSION + ' is the latest version.' };
     } catch { return { text: 'Could not reach the update address.' }; }
   },
-  /** Looks up the address people use to reach Folio and says whether it is private, a VPN address or public. */
+  /** Looks up the address people use to reach SoloFlow and says whether it is private, a VPN address or public. */
   privacyCheck: async (c) => {
     const host = str(c.p.host, 200).replace(/:\d+$/, '').replace(/^\[|\]$/g, '');
     let ips: string[] = [];

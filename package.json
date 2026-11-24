@@ -1,8 +1,8 @@
 {
-  "name": "folio",
-  "version": "1.0.0",
+  "name": "soloflow",
+  "version": "0.1.0",
   "private": true,
-  "description": "Folio: self-hosted home loan statement monitor and payoff forecaster.",
+  "description": "SoloFlow: self-hosted bookkeeping for Australian sole traders: statements, categories, GST and BAS.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

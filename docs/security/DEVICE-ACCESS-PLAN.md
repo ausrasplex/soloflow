@@ -1,12 +1,12 @@
 # Device-Bound Access and Encryption (future plan)
 
 Status: idea, planned for later. Nothing here is built yet.
-Belongs in the Folio repo at `docs/security/DEVICE-ACCESS-PLAN.md`.
+Belongs in the SoloFlow repo at `docs/security/DEVICE-ACCESS-PLAN.md`.
 Builds on `docs/security/HARDENING-TASKS.md`, especially tasks A3 (trusted client IP) and B3 (home-network-only invites).
 
 ## The Goal
 
-A device can only use Folio if it was registered while on the home network (or its VPN). A device without its key can't sign in, and can't connect at all when the front-door options are used. Optionally, the most sensitive details can only be read on registered devices, even by the server.
+A device can only use SoloFlow if it was registered while on the home network (or its VPN). A device without its key can't sign in, and can't connect at all when the front-door options are used. Optionally, the most sensitive details can only be read on registered devices, even by the server.
 
 ## Decision So Far
 
@@ -50,29 +50,29 @@ A device can only use Folio if it was registered while on the home network (or i
 
 ## Part 2: Device Certificates at the Front Door (mutual TLS)
 
-Each device gets a certificate. The front door (Cloudflare, or the reverse proxy in front of Authelia) drops any connection without one, so a stranger never reaches Folio's sign-in page.
+Each device gets a certificate. The front door (Cloudflare, or the reverse proxy in front of Authelia) drops any connection without one, so a stranger never reaches SoloFlow's sign-in page.
 
 **Setup outline (documentation only, plus a helper script)**
 - Run a small private certificate authority on Unraid: `step-ca` in a container, or a script using `openssl`. A helper script `tools/device-cert.sh <device-name>` would make a `.p12` file and a one-time password to install it.
 - Install the `.p12` on each device (iOS and Android profile, macOS Keychain, Windows certificate store). Do this at home, then delete the file.
 - **Option A, Cloudflare:** upload the CA to Cloudflare and add a rule blocking requests without a valid client certificate. Check which Cloudflare plan this needs (see open questions).
-- **Option B, Authelia:** in Caddy, Nginx Proxy Manager or SWAG, require client certificates (`ssl_verify_client on` in Nginx, `client_auth { mode require_and_verify }` in Caddy) before forwarding to Authelia and Folio.
+- **Option B, Authelia:** in Caddy, Nginx Proxy Manager or SWAG, require client certificates (`ssl_verify_client on` in Nginx, `client_auth { mode require_and_verify }` in Caddy) before forwarding to Authelia and SoloFlow.
 - Keep a revocation list. Removing a device means revoking its certificate and reloading the proxy.
-- Folio itself needs no code changes. Optionally, the proxy passes the certificate's device name in a header, and Folio shows it in the Devices list (trusted only from `SOLOFLOW_TRUSTED_PROXY_IPS`).
+- SoloFlow itself needs no code changes. Optionally, the proxy passes the certificate's device name in a header, and SoloFlow shows it in the Devices list (trusted only from `SOLOFLOW_TRUSTED_PROXY_IPS`).
 
 **Trade-off:** each new device needs a manual install. Some apps and browsers handle client certificates clumsily, especially on iOS. Passkeys (Part 1) are smoother, so Part 2 is the extra wall, not the only one.
 
 ## Part 3 (maybe later): Sensitive Details Readable Only on Registered Devices
 
-Encrypt only account numbers, BSBs and customer IDs in the browser, with a key the server never sees. Folio rarely needs these, so nothing else is lost.
+Encrypt only account numbers, BSBs and customer IDs in the browser, with a key the server never sees. SoloFlow rarely needs these, so nothing else is lost.
 
 **How it would work**
-- A household data key (AES-GCM 256) is made in the browser of the first registered device.
+- A business data key (AES-GCM 256) is made in the browser of the first registered device.
 - Each registered device has its own key pair. The private key is stored as a non-extractable WebCrypto key in IndexedDB, or derived from the passkey using the WebAuthn PRF extension where the device supports it.
-- The household data key is stored on the server once per device, wrapped with that device's public key. The server stores only wrapped keys and ciphertext.
+- The business data key is stored on the server once per device, wrapped with that device's public key. The server stores only wrapped keys and ciphertext.
 - Adding a device: an already-registered device, at home, wraps the data key for the new one. This is an approve-on-the-other-device step.
 - Removing a person: make a new data key, re-encrypt the few fields and re-wrap for the remaining devices.
-- A printed recovery key also wraps the data key. Losing every device and the recovery key means those details are gone for good (the rest of Folio is unaffected).
+- A printed recovery key also wraps the data key. Losing every device and the recovery key means those details are gone for good (the rest of SoloFlow is unaffected).
 
 **What changes:** the server can no longer show these fields in exports, backups (they stay encrypted inside), or the import check that matches statements by account suffix. That check would need the last two digits stored separately, in the clear, which is acceptable.
 
@@ -81,16 +81,16 @@ Encrypt only account numbers, BSBs and customer IDs in the browser, with a key t
 Considered and set aside, because:
 - **Statement reading and checks would move to the browser.** PDF and CSV reading, layout matching, checks and interest re-working all run on the server today.
 - **Scheduled work would stop.** Alerts (missing statements, rate reviews, behind schedule), automatic backups of readable data and the privacy check need the server to read data while devices are off.
-- **Sharing in a household gets complex.** Every change to who is on a loan means key re-wrapping.
+- **Sharing in a business gets complex.** Every change to who is on an account means key re-wrapping.
 - **A web app can't fully guarantee it.** The server sends the app's code each visit, so a compromised server could send code that takes the key. Only an installed, signed app avoids that.
 
-Revisit if Folio ever gets an installed app (for example a desktop or mobile wrapper) and the server-side features above become optional.
+Revisit if SoloFlow ever gets an installed app (for example a desktop or mobile wrapper) and the server-side features above become optional.
 
 ## Open Questions
 
 1. Should a passkey replace the password and two-step code completely, or count as the second step after the password?
 2. Should registration be allowed over the VPN, or only on the local network itself?
-3. How many devices per person? Is there a limit, and does each household member manage only their own?
+3. How many devices per person? Is there a limit, and does each business member manage only their own?
 4. Cloudflare: which plan supports blocking requests without a client certificate, and does it work with Cloudflare Tunnel? Check before choosing Option A.
 5. Is Part 3 worth doing once Parts 1 and 2 are in place?
 6. Does the WebAuthn PRF extension work on every device you use (iPhone, Android, Windows, Mac browsers)? If not, Part 3 needs the IndexedDB key route.
@@ -99,5 +99,5 @@ Revisit if Folio ever gets an installed app (for example a desktop or mobile wra
 
 1. Finish hardening tasks A3, A4 and B3 (trusted client IP, secure cookies, home-only invites).
 2. Part 1, passkeys registered only at home.
-3. Part 2, device certificates, when Folio is reachable from outside.
+3. Part 2, device certificates, when SoloFlow is reachable from outside.
 4. Decide on Part 3.

@@ -1,12 +1,12 @@
 # Security hardening tasks (for Claude Code)
 
-These tasks make Folio safe to reach from outside the home network. Work through them in order. Each task lists its files, what to change, and how to show it works. Tick a box only once its check passes.
+These tasks make SoloFlow safe to reach from outside the home network. Work through them in order. Each task lists its files, what to change, and how to show it works. Tick a box only once its check passes.
 
 The recommended setup is still a VPN (Tailscale or WireGuard) with nothing exposed. These tasks are worth doing anyway, and they are required before any public exposure. Section D lists the deployment options for that case.
 
 ## Ground rules
 
-- Keep the access rules exactly as they are. A loan is visible only to its borrowers and an account only to its holders. Shared records (lenders, brokers, layouts) never reveal private ones.
+- Keep the access rules exactly as they are. An account and its statements are visible only to its holders. Shared records (banks, layouts) never reveal private ones.
 - Any new setting goes in `.env.example`, with a comment, and in the README.
 - On-screen text: headings in Title Case, everything else in sentence case. Errors say what to do next.
 - Never run `prisma migrate reset` on a real install. Add schema changes with `prisma migrate dev --name <name>`.
@@ -40,7 +40,7 @@ The recommended setup is still a VPN (Tailscale or WireGuard) with nothing expos
 - [ ] **A4. Make cookies HTTPS-only by default**
   - File: `src/lib/server/auth.ts`.
   - Set `secure: true` whenever the request arrived over HTTPS (`x-forwarded-proto === 'https'` behind a trusted proxy, or `SOLOFLOW_URL` starts with `https://`). Keep `SOLOFLOW_SECURE_COOKIE=false` as an escape hatch for plain-HTTP LAN use.
-  - Rename the cookie to `__Host-folio_session` when it is secure.
+  - Rename the cookie to `__Host-soloflow_session` when it is secure.
   - Check: a sign-in through an HTTPS reverse proxy sets a `Secure` cookie.
 
 - [ ] **A5. Tighten session lifetime and rotation**
@@ -103,14 +103,14 @@ The recommended setup is still a VPN (Tailscale or WireGuard) with nothing expos
 ## D. Deployment (README and docs only, unless noted)
 
 - [ ] **D1. Recommend a VPN first**
-  - File: `README.md`, new section "Reaching Folio from outside your home".
-  - Recommend Tailscale (there is an Unraid plugin) or WireGuard (built into Unraid). Folio's privacy check already reports 100.64.0.0/10 as "Your VPN". Link to `docs/security/REMOTE-ACCESS.md`.
+  - File: `README.md`, new section "Reaching SoloFlow from outside your home".
+  - Recommend Tailscale (there is an Unraid plugin) or WireGuard (built into Unraid). SoloFlow's privacy check already reports 100.64.0.0/10 as "Your VPN". Link to `docs/security/REMOTE-ACCESS.md`.
 
 - [ ] **D2. Support Cloudflare Tunnel and Access**
-  - Docs: step-by-step in `docs/security/REMOTE-ACCESS.md`, covering the `cloudflared` container, a public hostname for Folio, and an Access application with an allow policy for the owner's email.
+  - Docs: step-by-step in `docs/security/REMOTE-ACCESS.md`, covering the `cloudflared` container, a public hostname for SoloFlow, and an Access application with an allow policy for the owner's email.
   - Code (optional, behind an env setting):
     - `SOLOFLOW_CF_ACCESS_AUD` and `SOLOFLOW_CF_ACCESS_TEAM`. When both are set, `src/middleware.ts` checks the `Cf-Access-Jwt-Assertion` header against the team's public keys (`https://<team>.cloudflareaccess.com/cdn-cgi/access/certs`) and the audience tag. A missing or invalid token returns 403.
-    - This stops anyone reaching Folio around the tunnel. Folio's own sign-in still applies.
+    - This stops anyone reaching SoloFlow around the tunnel. SoloFlow's own sign-in still applies.
     - Requests from the LAN, with no header, are allowed only when `SOLOFLOW_CF_ACCESS_LAN_BYPASS=true` and the IP is private.
   - Note in the docs: Cloudflare ends HTTPS at its edge, so statement uploads and balances pass through Cloudflare decrypted.
 
@@ -118,7 +118,7 @@ The recommended setup is still a VPN (Tailscale or WireGuard) with nothing expos
   - Docs: step-by-step in `docs/security/REMOTE-ACCESS.md` for Authelia with a reverse proxy (Nginx Proxy Manager, SWAG or Caddy) using forward auth. Cover one-factor and two-factor policy, and a Let's Encrypt certificate.
   - Code (optional):
     - `SOLOFLOW_TRUSTED_PROXY_IPS`, a comma-separated list. Accept `Remote-User` and `Remote-Email` headers only from those IPs.
-    - Folio does not use them to sign anyone in by default. They are only a second gate: when `SOLOFLOW_REQUIRE_PROXY_AUTH=true`, any request without them from a non-private IP gets 403.
+    - SoloFlow does not use them to sign anyone in by default. They are only a second gate: when `SOLOFLOW_REQUIRE_PROXY_AUTH=true`, any request without them from a non-private IP gets 403.
 
 - [ ] **D4. Write a pre-exposure checklist**
   - File: `docs/security/REMOTE-ACCESS.md`, a checklist section. Each item is a tick box:
@@ -129,7 +129,7 @@ The recommended setup is still a VPN (Tailscale or WireGuard) with nothing expos
     - A backup made, and a restore tested
     - `npm audit` clean, or each finding noted
     - Front-door login (Cloudflare Access or Authelia) in place
-    - Port forwarding only to the proxy, never straight to Folio or Postgres
+    - Port forwarding only to the proxy, never straight to SoloFlow or Postgres
 
 ## E. Keeping it up to date
 

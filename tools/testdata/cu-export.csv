@@ -1,7 +1,6 @@
 Date,Narrative,Debit,Credit,Balance
 01/09/2026,Opening transfer,,500.00,500.00
-05/09/2026,Woolworths Metro,62.40,,437.60
-12/09/2026,Employer pay,,1800.00,2237.60
+05/09/2026,Officeworks,62.40,,437.60
+12/09/2026,Transfer from business account,,1800.00,2237.60
 15/09/2026,Shell Coles Express,71.25,,2166.35
-22/09/2026,Telstra,89.00,,2077.35
-29/09/2026,Interest,,1.42,2078.77
+28/09/2026,Interest,,1.84,2168.19

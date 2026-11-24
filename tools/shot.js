@@ -2,17 +2,17 @@
 const { chromium } = require('playwright');
 (async () => {
   const [, , path, out, w = '1280', h = '1400', steps = '[]'] = process.argv;
-  const b = await chromium.launch();
+  const b = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
   const fs = require('fs');
-  const state = '/tmp/folio-auth.json';
+  const state = '/tmp/soloflow-auth.json';
   const who = process.env.WHO || 'alex';
   const sfile = state.replace('.json', '-' + who + '.json');
   const ctx = await b.newContext({ viewport: { width: +w, height: +h }, storageState: fs.existsSync(sfile) ? sfile : undefined });
   const p = await ctx.newPage();
   if (!fs.existsSync(sfile)) {
     await p.goto('http://localhost:3100/signin');
-    await p.fill('input[name=email]', who + '@folio.local');
-    await p.fill('input[name=password]', 'folio-demo');
+    await p.fill('input[name=email]', who + '@soloflow.local');
+    await p.fill('input[name=password]', 'soloflow-demo');
     await Promise.all([p.waitForNavigation(), p.click('button[type=submit]')]);
     await ctx.storageState({ path: sfile });
   }

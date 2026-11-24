@@ -1,0 +1,143 @@
+{
+  "layouts": [
+    {
+      "name": "Business account statement",
+      "bankName": "Example Bank",
+      "kind": "account",
+      "format": "PDF",
+      "map": {
+        "period": {
+          "page": 1,
+          "box": [
+            58,
+            19,
+            38,
+            7
+          ]
+        },
+        "opening": {
+          "page": 1,
+          "box": [
+            4,
+            36,
+            18,
+            7
+          ]
+        },
+        "debits": {
+          "page": 1,
+          "box": [
+            24,
+            36,
+            18,
+            7
+          ]
+        },
+        "credits": {
+          "page": 1,
+          "box": [
+            62,
+            36,
+            16,
+            7
+          ]
+        },
+        "closing": {
+          "page": 1,
+          "box": [
+            80,
+            36,
+            17,
+            7
+          ]
+        },
+        "table": {
+          "page": 2,
+          "box": [
+            4,
+            12,
+            92,
+            80
+          ]
+        },
+        "cDate": {
+          "page": 2,
+          "box": [
+            4,
+            12,
+            12,
+            80
+          ]
+        },
+        "cDesc": {
+          "page": 2,
+          "box": [
+            16,
+            12,
+            41,
+            80
+          ]
+        },
+        "cDebit": {
+          "page": 2,
+          "box": [
+            57,
+            12,
+            13,
+            80
+          ]
+        },
+        "cCredit": {
+          "page": 2,
+          "box": [
+            70,
+            12,
+            13,
+            80
+          ]
+        },
+        "cBal": {
+          "page": 2,
+          "box": [
+            83,
+            12,
+            13,
+            80
+          ]
+        },
+        "acct": {
+          "page": 1,
+          "box": [
+            58,
+            13,
+            38,
+            5
+          ]
+        }
+      }
+    },
+    {
+      "name": "Account export",
+      "bankName": "Sample Credit Union",
+      "kind": "account",
+      "format": "CSV",
+      "map": {
+        "cols": [
+          "date",
+          "desc",
+          "debit",
+          "credit",
+          "balance"
+        ],
+        "dateFmt": "dmy",
+        "header": [
+          "Date",
+          "Narrative",
+          "Debit",
+          "Credit",
+          "Balance"
+        ]
+      }
+    }
+  ]
+}
