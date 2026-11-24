@@ -5,9 +5,9 @@ import { gzipSync, gunzipSync } from 'zlib';
 import { Prisma } from '@prisma/client';
 import { db } from './db';
 
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '0.1.0';
 // parents before children, so a restore can insert in this order
-const ORDER = ['User', 'Household', 'Membership', 'Invite', 'Lender', 'Broker', 'Loan', 'LoanBorrower', 'LoanSplit', 'RateChange', 'RepaymentChange', 'LoanEvent', 'Scenario', 'Account', 'AccountHolder', 'Layout', 'LayoutVersion', 'StoredFile', 'Statement', 'Txn', 'Channel', 'ServerSetting'] as const;
+const ORDER = ['User', 'Business', 'Membership', 'Invite', 'Bank', 'Account', 'AccountHolder', 'Layout', 'LayoutVersion', 'StoredFile', 'Statement', 'Txn', 'Channel', 'ServerSetting'] as const;
 type Delegate = { findMany: (a?: unknown) => Promise<Record<string, unknown>[]>; createMany: (a: unknown) => Promise<unknown>; deleteMany: (a?: unknown) => Promise<unknown> };
 const del = (name: string) => (db as unknown as Record<string, Delegate>)[name.charAt(0).toLowerCase() + name.slice(1)];
 const fieldsOf = (name: string) => Prisma.dmmf.datamodel.models.find((m) => m.name === name)!.fields.filter((f) => f.kind === 'scalar' || f.kind === 'enum');
@@ -15,7 +15,7 @@ const fieldsOf = (name: string) => Prisma.dmmf.datamodel.models.find((m) => m.na
 export type BackupSettings = { auto: boolean; freq: 'daily' | 'weekly'; keep: number; folder: string; remind: boolean };
 export async function backupSettings(): Promise<BackupSettings> {
   const v = ((await db.serverSetting.findUnique({ where: { key: 'backups' } }))?.value || {}) as Partial<BackupSettings>;
-  return { auto: v.auto !== false, freq: v.freq === 'weekly' ? 'weekly' : 'daily', keep: [7, 14, 30].includes(Number(v.keep)) ? Number(v.keep) : 7, folder: v.folder || process.env.FOLIO_BACKUP_DIR || './backups', remind: v.remind !== false };
+  return { auto: v.auto !== false, freq: v.freq === 'weekly' ? 'weekly' : 'daily', keep: [7, 14, 30].includes(Number(v.keep)) ? Number(v.keep) : 7, folder: v.folder || process.env.SOLOFLOW_BACKUP_DIR || './backups', remind: v.remind !== false };
 }
 export const folderPath = (f: string) => path.resolve(process.cwd(), f);
 
@@ -32,9 +32,9 @@ export async function makeBackup(auto: boolean) {
     counts[name] = rows.length;
   }
   const made = new Date();
-  const body = gzipSync(Buffer.from(JSON.stringify({ folio: 'backup', format: 1, appVersion: APP_VERSION, made: made.toISOString(), counts, data })));
+  const body = gzipSync(Buffer.from(JSON.stringify({ soloflow: 'backup', format: 1, appVersion: APP_VERSION, made: made.toISOString(), counts, data })));
   const stamp = made.toISOString().slice(0, 16).replace(/[:T]/g, '-');
-  const fileName = 'folio-backup-' + stamp + '.folio';
+  const fileName = 'soloflow-backup-' + stamp + '.soloflow';
   await fs.writeFile(path.join(dir, fileName), body);
   const row = await db.backup.create({ data: { fileName, size: body.length, auto } });
   // keep only the newest ones
@@ -44,9 +44,9 @@ export async function makeBackup(auto: boolean) {
 }
 
 export function readBackup(buf: Buffer) {
-  let j: { folio?: string; format?: number; appVersion?: string; made?: string; counts?: Record<string, number>; data?: Record<string, Record<string, unknown>[]> };
-  try { j = JSON.parse(gunzipSync(buf).toString('utf8')); } catch { throw new Error('This is not a Folio backup file.'); }
-  if (j.folio !== 'backup' || !j.data) throw new Error('This is not a Folio backup file.');
+  let j: { soloflow?: string; format?: number; appVersion?: string; made?: string; counts?: Record<string, number>; data?: Record<string, Record<string, unknown>[]> };
+  try { j = JSON.parse(gunzipSync(buf).toString('utf8')); } catch { throw new Error('This is not a SoloFlow backup file.'); }
+  if (j.soloflow !== 'backup' || !j.data) throw new Error('This is not a SoloFlow backup file.');
   return j as Required<typeof j>;
 }
 

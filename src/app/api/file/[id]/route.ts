@@ -10,7 +10,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const { m } = await currentMembership(u);
   if (!m) return new Response('Not found', { status: 404 });
   const { id } = await ctx.params;
-  const f = await myFile(u.id, m.householdId, id);
+  const f = await myFile(u.id, m.businessId, id);
   if (!f) return new Response('Not found', { status: 404 });
   const dl = new URL(req.url).searchParams.get('download');
   return new Response(new Uint8Array(f.data), {

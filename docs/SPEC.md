@@ -530,5 +530,5 @@ Done: all mockups reviewed and built as a working app, tested locally. Next: a D
 - Changing the sign-in email asks for the password and changes it straight away (there is no mail server).
 - Recovery codes are shown once, when two-step is turned on or new codes are made (making new codes needs a current code and replaces the old ones). Two-step can be turned off with a code or a recovery code.
 - The privacy check looks up the address the page was opened on: private addresses read as "This network only", the 100.64/10 range as "Your VPN", anything else as "A public address".
-- Backups are one gzipped JSON file with every table and statement file. Encrypted fields stay encrypted, so a restore needs the same FOLIO_SECRET. Restore replaces everything and signs everyone out.
+- Backups are one gzipped JSON file with every table and statement file. Encrypted fields stay encrypted, so a restore needs the same SOLOFLOW_SECRET. Restore replaces everything and signs everyone out.
 - Alerts go to each person's connected services once each; secrets are encrypted; Discord and Telegram are skipped when the admin turns off outside services.

@@ -12,10 +12,10 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const { m } = await currentMembership(u);
   if (!m) return Response.json({ error: 'Not found' }, { status: 404 });
   const { id } = await ctx.params;
-  const s = await db.statement.findFirst({ where: { id, ...myStatements(u.id, m.householdId, null) }, include: { txns: { orderBy: [{ page: 'asc' }, { row: 'asc' }, { date: 'asc' }] } } });
+  const s = await db.statement.findFirst({ where: { id, ...myStatements(u.id, m.businessId, null) }, include: { txns: { orderBy: [{ page: 'asc' }, { row: 'asc' }, { date: 'asc' }] } } });
   if (!s) return Response.json({ error: 'Not found' }, { status: 404 });
   return Response.json({
     id: s.id,
-    txns: s.txns.map((t) => ({ date: t.date.toISOString().slice(0, 10), desc: t.description, debit: n(t.debit) || 0, credit: n(t.credit) || 0, bal: n(t.balance), rate: n(t.rate), page: t.page, row: t.row, y: t.y, yh: t.yh, cat: t.category }))
+    txns: s.txns.map((t) => ({ date: t.date.toISOString().slice(0, 10), desc: t.description, debit: n(t.debit) || 0, credit: n(t.credit) || 0, bal: n(t.balance), page: t.page, row: t.row, y: t.y, yh: t.yh, cat: t.category }))
   });
 }

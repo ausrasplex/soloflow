@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { db } from './db';
 import { sha256, token } from './crypto';
 
-export const COOKIE = 'folio_session';
+export const COOKIE = 'soloflow_session';
 const DAYS = 30;
 
 export async function hashPassword(p: string) { return bcrypt.hash(p, 11); }
@@ -13,7 +13,7 @@ export async function startSession(userId: string, pending2fa = false) {
   const t = token(32);
   const h = await headers();
   await db.session.create({ data: { id: sha256(t), userId, pending2fa, userAgent: (h.get('user-agent') || '').slice(0, 300), ip: (h.get('x-forwarded-for') || '').split(',')[0] || null } });
-  (await cookies()).set(COOKIE, t, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: DAYS * 86400, secure: process.env.FOLIO_SECURE_COOKIE === 'true' });
+  (await cookies()).set(COOKIE, t, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: DAYS * 86400, secure: process.env.SOLOFLOW_SECURE_COOKIE === 'true' });
   return t;
 }
 
@@ -38,9 +38,9 @@ export async function currentUser(allowPending = false) {
 
 export type CurrentUser = NonNullable<Awaited<ReturnType<typeof currentUser>>>;
 
-/** Membership in the household the person is looking at (first active one if none chosen). */
+/** Membership in the business the person is looking at (first active one if none chosen). */
 export async function currentMembership(u: CurrentUser) {
-  const ms = await db.membership.findMany({ where: { userId: u.id, removedAt: null, household: { deletedAt: null } }, include: { household: true }, orderBy: { joinedAt: 'asc' } });
-  const m = ms.find((x) => x.householdId === u.currentHouseholdId) || ms[0] || null;
+  const ms = await db.membership.findMany({ where: { userId: u.id, removedAt: null, business: { deletedAt: null } }, include: { business: true }, orderBy: { joinedAt: 'asc' } });
+  const m = ms.find((x) => x.businessId === u.currentBusinessId) || ms[0] || null;
   return { m, all: ms };
 }

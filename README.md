@@ -27,12 +27,12 @@ Copy `.env.example` to `.env` and fill in:
 
 ```
 DATABASE_URL="postgresql://folio:pick-a-password@localhost:5432/folio?schema=public"
-FOLIO_SECRET="a long random string"
+SOLOFLOW_SECRET="a long random string"
 ```
 
 Make the secret with `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`.
 
-**Keep `FOLIO_SECRET` safe and never change it.** It encrypts account numbers, BSBs and two-step secrets. A backup restored on another install only reads those back if that install has the same secret.
+**Keep `SOLOFLOW_SECRET` safe and never change it.** It encrypts account numbers, BSBs and two-step secrets. A backup restored on another install only reads those back if that install has the same secret.
 
 ## 3. Install and start
 

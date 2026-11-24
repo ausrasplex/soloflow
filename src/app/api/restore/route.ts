@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     if (String(fd.get('confirm') || '') !== 'RESTORE') {
       const b = readBackup(buf);
       const c = b.counts || {};
-      return Response.json({ name: f.name, made: b.made, appVersion: b.appVersion, households: c.Household || 0, people: c.User || 0, loans: (c.Loan || 0) + (c.Account || 0), statements: c.Statement || 0, size: buf.length });
+      return Response.json({ name: f.name, made: b.made, appVersion: b.appVersion, businesses: c.Business || 0, people: c.User || 0, accounts: c.Account || 0, statements: c.Statement || 0, size: buf.length });
     }
     await restoreBackup(buf);
     return Response.json({ restored: true });

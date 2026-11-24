@@ -1,18 +1,17 @@
 // Reads statement files on this server. PDFs: text with positions (pdf.js), then the saved layout's boxes say
 import nodePath from 'path';
 // which text is which. CSVs: the header row picks the layout, the layout says what each column holds.
-import Decimal from 'decimal.js';
+// Two kinds of statement: account (a balance you hold, money in adds to it) and card (a balance you owe, money out adds to it).
 import { db } from './db';
-import { runDaily } from '../engine';
 
 export type Item = { s: string; x: number; y: number; w: number; h: number; page: number }; // percent of the page, y from the top
 export type Page = { n: number; items: Item[]; text: string; wPt: number; hPt: number };
-export type Txn = { date: string; description: string; debit: number; credit: number; balance: number | null; rate: number | null; page: number; row: number; y?: number; yh?: number };
+export type Txn = { date: string; description: string; debit: number; credit: number; balance: number | null; page: number; row: number; y?: number; yh?: number };
 export type Check = { ok: boolean; text: string };
 export type Read = {
   format: 'PDF' | 'CSV'; pages: number; period: { start: string; end: string } | null;
-  opening: number | null; closing: number | null; interest: number | null; credits: number | null; debits: number | null;
-  advance: number | null; rate: number | null; acct: string; txns: Txn[]; checks: Check[]; ok: boolean
+  opening: number | null; closing: number | null; credits: number | null; debits: number | null;
+  acct: string; txns: Txn[]; checks: Check[]; ok: boolean
 };
 type Box = { page: number; box: number[] };
 export type PdfMap = Record<string, Box>;
@@ -48,7 +47,6 @@ export function moneyIn(t: string): number | null {
   if (!isFinite(n)) return null;
   return neg ? -n : n;
 }
-export const rateIn = (t: string) => { const m = String(t).match(/(\d{1,2}\.\d{1,4})\s*%/); return m ? Number(m[1]) : null; };
 
 export async function pdfPages(buf: Buffer): Promise<Page[]> {
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
@@ -103,10 +101,9 @@ export function readPdf(pages: Page[], map: PdfMap, kind: string): Read {
         const ds = datesIn(dTxt + (dTxt && !/\d{4}/.test(dTxt) && pd[1] ? ' ' + pd[1].slice(0, 4) : ''));
         if (ds.length) {
           const debit = Math.abs(moneyIn(deb) ?? 0), credit = Math.abs(moneyIn(cre) ?? 0), b = moneyIn(bal);
-          txns.push({ date: ds[0], description: desc, debit: r2(debit), credit: r2(credit), balance: b == null ? null : r2(Math.abs(b)), rate: /rate/i.test(desc) ? rateIn(desc) : null, page: p.n, row: row++, y: Math.round(Math.min(...ln.map((it) => it.y)) * 100) / 100, yh: Math.round(Math.max(...ln.map((it) => it.h)) * 100) / 100 });
+          txns.push({ date: ds[0], description: desc, debit: r2(debit), credit: r2(credit), balance: b == null ? null : r2(Math.abs(b)), page: p.n, row: row++, y: Math.round(Math.min(...ln.map((it) => it.y)) * 100) / 100, yh: Math.round(Math.max(...ln.map((it) => it.h)) * 100) / 100 });
         } else if (txns.length && desc && !deb && !cre && !/^(date|description|transaction|details)/i.test(desc)) {
           txns[txns.length - 1].description += ' ' + desc; // wrapped line
-          if (/rate/i.test(desc) && txns[txns.length - 1].rate == null) txns[txns.length - 1].rate = rateIn(desc);
         }
       }
     }
@@ -114,8 +111,8 @@ export function readPdf(pages: Page[], map: PdfMap, kind: string): Read {
   const num = (k: string) => { const v = moneyIn(f(k)); return v == null ? null : Math.abs(v); };
   const r: Read = {
     format: 'PDF', pages: pages.length, period: pd.length >= 2 ? { start: pd[0], end: pd[1] } : null,
-    opening: num('opening'), closing: num('closing'), interest: kind === 'loan' ? num('interest') : null,
-    credits: num('credits'), debits: kind === 'loan' ? num('debits') : num('debits'), advance: num('advance'), rate: rateIn(f('rate')),
+    opening: num('opening'), closing: num('closing'),
+    credits: num('credits'), debits: num('debits'),
     acct: (f('acct').match(/\d[\d\s-]{3,}\d/) || [''])[0].replace(/\s+/g, ' '), txns, checks: [], ok: false
   };
   return finish(r, kind);
@@ -125,21 +122,18 @@ export function readPdf(pages: Page[], map: PdfMap, kind: string): Read {
 function finish(r: Read, kind: string): Read {
   const sum = (k: 'debit' | 'credit', test?: (t: Txn) => boolean) => r2(r.txns.filter((t) => !test || test(t)).reduce((s, t) => s + t[k], 0));
   if (r.credits == null) r.credits = sum('credit');
-  if (kind === 'loan') {
-    if (r.interest == null) r.interest = sum('debit', (t) => /interest/i.test(t.description));
-    if (r.debits == null) r.debits = r2(sum('debit') - (r.interest || 0));
-  } else if (r.debits == null) r.debits = sum('debit');
-  if (r.opening == null && r.txns.length && r.txns[0].balance != null) r.opening = r2(r.txns[0].balance - r.txns[0].debit * (kind === 'loan' ? 1 : -1) + r.txns[0].credit * (kind === 'loan' ? 1 : -1));
+  if (r.debits == null) r.debits = sum('debit');
+  const owed = kind === 'card';
+  if (r.opening == null && r.txns.length && r.txns[0].balance != null) r.opening = r2(r.txns[0].balance - r.txns[0].debit * (owed ? 1 : -1) + r.txns[0].credit * (owed ? 1 : -1));
   if (r.closing == null) { const last = [...r.txns].reverse().find((t) => t.balance != null); if (last) r.closing = last.balance; }
   if (!r.period && r.txns.length) r.period = { start: r.txns[0].date, end: r.txns[r.txns.length - 1].date };
-  if (r.rate == null) { const rr = [...r.txns].reverse().find((t) => t.rate != null); if (rr) r.rate = rr.rate; }
   const checks: Check[] = [];
   const m = (n: number | null) => '$' + (n ?? 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (!r.period) checks.push({ ok: false, text: 'The statement period could not be read' });
   if (r.opening == null || r.closing == null) checks.push({ ok: false, text: 'The opening or closing balance could not be read' });
-  else if (kind === 'loan') {
-    const calc = r2(r.opening + (r.interest || 0) + (r.debits || 0) - (r.credits || 0));
-    checks.push({ ok: Math.abs(calc - r.closing) < 0.011, text: 'Opening ' + m(r.opening) + ' + interest ' + m(r.interest) + (r.debits ? ' + other debits ' + m(r.debits) : '') + ' − credits ' + m(r.credits) + ' = ' + (Math.abs(calc - r.closing) < 0.011 ? 'closing ' + m(r.closing) : m(calc) + ', but the closing balance says ' + m(r.closing)) });
+  else if (owed) {
+    const calc = r2(r.opening + (r.debits || 0) - (r.credits || 0));
+    checks.push({ ok: Math.abs(calc - r.closing) < 0.011, text: 'Opening ' + m(r.opening) + ' owed + spending ' + m(r.debits) + ' − payments ' + m(r.credits) + ' = ' + (Math.abs(calc - r.closing) < 0.011 ? 'closing ' + m(r.closing) : m(calc) + ', but the closing balance says ' + m(r.closing)) });
   } else {
     const calc = r2(r.opening + (r.credits || 0) - (r.debits || 0));
     checks.push({ ok: Math.abs(calc - r.closing) < 0.011, text: 'Opening ' + m(r.opening) + ' + money in ' + m(r.credits) + ' − money out ' + m(r.debits) + ' = ' + (Math.abs(calc - r.closing) < 0.011 ? 'closing ' + m(r.closing) : m(calc) + ', but the closing balance says ' + m(r.closing)) });
@@ -147,7 +141,7 @@ function finish(r: Read, kind: string): Read {
   const withBal = r.txns.filter((t) => t.balance != null);
   if (withBal.length && r.opening != null) {
     let prev = r.opening, good = 0;
-    const sign = kind === 'loan' ? 1 : -1;
+    const sign = owed ? 1 : -1;
     for (const t of r.txns) { if (t.balance == null) continue; const exp = r2(prev + sign * (t.debit - t.credit)); if (Math.abs(exp - t.balance) < 0.011 || (t.debit === 0 && t.credit === 0)) good++; prev = t.balance; }
     checks.push({ ok: good === withBal.length, text: good === withBal.length ? 'Running balance agrees on all ' + withBal.length + ' rows' + (r.pages > 1 ? ' across ' + r.pages + ' pages' : '') : 'Running balance agrees on ' + good + ' of ' + withBal.length + ' rows' });
   } else if (!r.txns.length) checks.push({ ok: false, text: 'No transactions were found in the table' });
@@ -179,13 +173,13 @@ export function readCsv(rows: string[][], map: CsvMap, kind: string): Read {
     if (idx('amount') >= 0) { const a = moneyIn(r[idx('amount')] || '') ?? 0; if (a < 0) debit = -a; else credit = a; }
     else { debit = Math.abs(moneyIn(r[idx('debit')] || '') ?? 0); credit = Math.abs(moneyIn(r[idx('credit')] || '') ?? 0); }
     const b = idx('balance') >= 0 ? moneyIn(r[idx('balance')] || '') : null;
-    txns.push({ date: ds[0], description: idx('desc') >= 0 ? r[idx('desc')] : '', debit: r2(debit), credit: r2(credit), balance: b, rate: null, page: 1, row: i });
+    txns.push({ date: ds[0], description: idx('desc') >= 0 ? r[idx('desc')] : '', debit: r2(debit), credit: r2(credit), balance: b, page: 1, row: i });
   });
   // newest-first exports are turned around so the running balance reads forwards
   if (txns.length > 1 && txns[0].date > txns[txns.length - 1].date) txns.reverse();
   const first = txns[0];
-  const opening = first && first.balance != null ? r2(first.balance - (first.credit - first.debit) * (kind === 'loan' ? -1 : 1)) : null;
-  return finish({ format: 'CSV', pages: 1, period: null, opening, closing: null, interest: null, credits: null, debits: null, advance: null, rate: null, acct: '', txns, checks: [], ok: false }, kind);
+  const opening = first && first.balance != null ? r2(first.balance - (first.credit - first.debit) * (kind === 'card' ? -1 : 1)) : null;
+  return finish({ format: 'CSV', pages: 1, period: null, opening, closing: null, credits: null, debits: null, acct: '', txns, checks: [], ok: false }, kind);
 }
 
 type LayoutRow = Awaited<ReturnType<typeof loadLayouts>>[number];
@@ -217,23 +211,12 @@ export async function matchFile(buf: Buffer, name: string, mime: string, force?:
   const pages = await pdfPages(buf);
   const first = (pages[0]?.text || '').toLowerCase();
   let best: { layout: LayoutRow; version: LayoutRow['versions'][number]; read: Read; score: number } | null = null;
-  for (const l of layouts.filter((x) => x.format === 'PDF' && first.includes(x.lenderName.toLowerCase()))) {
+  for (const l of layouts.filter((x) => x.format === 'PDF' && first.includes(x.bankName.toLowerCase()))) {
     for (const v of l.versions) {
       const rd = readPdf(pages, v.map as unknown as PdfMap, l.kind);
-      const score = rd.checks.filter((c) => c.ok).length * 10 + (rd.period ? 3 : 0) + Math.min(5, rd.txns.length / 10) + (l.kind === 'loan' && /loan/.test(first) ? 2 : 0) + (l.kind === 'account' && !/loan/.test(first) ? 2 : 0);
+      const score = rd.checks.filter((c) => c.ok).length * 10 + (rd.period ? 3 : 0) + Math.min(5, rd.txns.length / 10) + (l.kind === 'card' && /credit card|card number|minimum payment/.test(first) ? 2 : 0) + (l.kind === 'account' && !/credit card|minimum payment/.test(first) ? 2 : 0);
       if (!best || score > best.score) best = { layout: l, version: v, read: rd, score };
     }
   }
   return best && best.score >= 13 ? { layout: best.layout, version: best.version, read: best.read, pages } : { layout: null, version: null, read: null, pages, near: best ? best.layout : null };
-}
-
-/** Engine check for loans without an offset: works the interest out from the daily balances and compares. */
-export function engineInterest(read: Read, rateFrom: (iso: string) => number, postingDay: number, dayCount = 365) {
-  if (!read.period || read.opening == null) return null;
-  const start = new Date(read.period.start + 'T00:00:00Z'), end = new Date(read.period.end + 'T00:00:00Z');
-  const moves = read.txns.filter((t) => !/interest/i.test(t.description) && (t.credit || t.debit)).map((t) => ({ date: new Date(t.date + 'T00:00:00Z'), splitId: 's', amount: new Decimal(t.credit).minus(t.debit) }));
-  const rates: { from: Date; rate: number }[] = [{ from: new Date(0), rate: rateFrom(read.period.start) }];
-  for (const t of read.txns) if (t.rate != null) rates.push({ from: new Date(t.date + 'T00:00:00Z'), rate: t.rate });
-  const res = runDaily({ splits: [{ id: 's', name: 's', kind: 'VARIABLE', balance: read.opening, rates }], movements: moves, postingDay, dayCount }, start, end);
-  return res.totalInterest.toNumber();
 }

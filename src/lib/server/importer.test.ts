@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { datesIn, moneyIn, parseCsv, rateIn, readCsv } from './importer';
+import { datesIn, moneyIn, parseCsv, readCsv } from './importer';
 
 describe('moneyIn', () => {
   it('reads plain, comma and signed amounts', () => {
@@ -14,13 +14,10 @@ describe('moneyIn', () => {
   });
 });
 
-describe('datesIn and rateIn', () => {
+describe('datesIn', () => {
   it('reads common date shapes', () => {
     expect(datesIn('12/02/2026 to 11/08/2026')).toEqual(['2026-02-12', '2026-08-11']);
     expect(datesIn('10 Apr 2026')).toEqual(['2026-04-10']);
-  });
-  it('reads a rate from a rate-change line', () => {
-    expect(rateIn('INTEREST RATE CHANGE TO 5.91% PA')).toBe(5.91);
   });
 });
 
@@ -37,5 +34,19 @@ describe('readCsv', () => {
     const r = readCsv(rows, { cols: ['date', 'desc', 'amount', 'balance'], dateFmt: 'dmy', header: rows[0] }, 'account');
     expect(r.txns[0].date).toBe('2026-09-01');
     expect(r.ok).toBe(true);
+  });
+  it('reads a credit card export, where spending adds to the balance owed', () => {
+    const rows = parseCsv('Date,Details,Amount,Balance\n02/09/2026,Bunnings Warehouse,-186.00,1636.00\n11/09/2026,Haymans Electrical,-720.00,2356.00\n22/09/2026,Payment received thank you,2100.00,256.00\n');
+    const r = readCsv(rows, { cols: ['date', 'desc', 'amount', 'balance'], dateFmt: 'dmy', header: rows[0] }, 'card');
+    expect(r.opening).toBe(1450);
+    expect(r.debits).toBe(906);
+    expect(r.credits).toBe(2100);
+    expect(r.closing).toBe(256);
+    expect(r.ok).toBe(true);
+  });
+  it('does not add up when a card export is read as a bank account', () => {
+    const rows = parseCsv('Date,Details,Amount,Balance\n02/09/2026,Bunnings Warehouse,-186.00,1636.00\n11/09/2026,Haymans Electrical,-720.00,2356.00\n');
+    const r = readCsv(rows, { cols: ['date', 'desc', 'amount', 'balance'], dateFmt: 'dmy', header: rows[0] }, 'account');
+    expect(r.ok).toBe(false);
   });
 });

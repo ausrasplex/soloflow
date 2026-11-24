@@ -24,7 +24,7 @@ export const userActions: Record<string, Action> = {
     await mergePrefs(u.id, { readAlerts: Array.from(new Set(prev.concat(ids))).slice(-500) });
   },
   prefs: async ({ u, p }) => {
-    const allowed = ['loansHeroCards', 'accountsHeroCards', 'loanHeroCards', 'alerts', 'missDays', 'revLead'];
+    const allowed = ['accountsHeroCards', 'alerts', 'missDays'];
     const patch: Record<string, unknown> = {};
     for (const k of allowed) if (k in p) patch[k] = p[k];
     await mergePrefs(u.id, patch);
@@ -82,20 +82,20 @@ export const userActions: Record<string, Action> = {
     await db.session.deleteMany({ where: { userId: u.id, id: str(p.id) } });
   },
   signOutOthers: async ({ u }) => { await db.session.deleteMany({ where: { userId: u.id, id: { not: u.sessionId } } }); },
-  leaveHousehold: async ({ u, p }) => {
-    const m = await db.membership.findFirst({ where: { userId: u.id, householdId: str(p.id), removedAt: null } });
-    need(m, 'You are not in that household.');
-    if (m!.role === 'OWNER') need(await db.membership.count({ where: { householdId: m!.householdId, removedAt: null, role: 'OWNER', userId: { not: u.id } } }), 'You are the only owner. Make someone else an owner first, or delete the household.');
+  leaveBusiness: async ({ u, p }) => {
+    const m = await db.membership.findFirst({ where: { userId: u.id, businessId: str(p.id), removedAt: null } });
+    need(m, 'You are not in that business.');
+    if (m!.role === 'OWNER') need(await db.membership.count({ where: { businessId: m!.businessId, removedAt: null, role: 'OWNER', userId: { not: u.id } } }), 'You are the only owner. Make someone else an owner first, or delete the business.');
     await db.membership.update({ where: { id: m!.id }, data: { removedAt: new Date() } });
-    if (u.currentHouseholdId === m!.householdId) {
-      const next = await db.membership.findFirst({ where: { userId: u.id, removedAt: null, household: { deletedAt: null } } });
-      await db.user.update({ where: { id: u.id }, data: { currentHouseholdId: next?.householdId || null } });
+    if (u.currentBusinessId === m!.businessId) {
+      const next = await db.membership.findFirst({ where: { userId: u.id, removedAt: null, business: { deletedAt: null } } });
+      await db.user.update({ where: { id: u.id }, data: { currentBusinessId: next?.businessId || null } });
     }
   },
-  switchHousehold: async ({ u, p }) => {
-    const m = await db.membership.findFirst({ where: { userId: u.id, householdId: str(p.id), removedAt: null } });
-    need(m, 'You are not in that household.');
-    await db.user.update({ where: { id: u.id }, data: { currentHouseholdId: m!.householdId } });
+  switchBusiness: async ({ u, p }) => {
+    const m = await db.membership.findFirst({ where: { userId: u.id, businessId: str(p.id), removedAt: null } });
+    need(m, 'You are not in that business.');
+    await db.user.update({ where: { id: u.id }, data: { currentBusinessId: m!.businessId } });
   }
 };
 export { mergePrefs };

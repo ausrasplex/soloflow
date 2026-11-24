@@ -3,9 +3,9 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes, scryptSync }
 let key: Buffer | null = null;
 function k() {
   if (!key) {
-    const s = process.env.FOLIO_SECRET;
-    if (!s || s.length < 16) throw new Error('FOLIO_SECRET is missing or shorter than 16 characters. Set it in .env');
-    key = scryptSync(s, 'folio-at-rest', 32);
+    const s = process.env.SOLOFLOW_SECRET;
+    if (!s || s.length < 16) throw new Error('SOLOFLOW_SECRET is missing or shorter than 16 characters. Set it in .env');
+    key = scryptSync(s, 'soloflow-at-rest', 32);
   }
   return key;
 }

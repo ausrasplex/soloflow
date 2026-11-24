@@ -30,8 +30,8 @@ export const serverActions: Record<string, Action> = {
   },
   checkUpdate: async (c) => {
     admin(c);
-    const url = process.env.FOLIO_UPDATE_URL;
-    if (!url) return { text: 'Folio ' + APP_VERSION + ' is installed. Update checks are off because FOLIO_UPDATE_URL is not set.' };
+    const url = process.env.SOLOFLOW_UPDATE_URL;
+    if (!url) return { text: 'Folio ' + APP_VERSION + ' is installed. Update checks are off because SOLOFLOW_UPDATE_URL is not set.' };
     try {
       const r = await fetch(url, { signal: AbortSignal.timeout(8000) }); const j = await r.json();
       const latest = String(j.version || j.tag_name || '').replace(/^v/, '');

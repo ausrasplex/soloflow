@@ -2,6 +2,6 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     const { startJobs } = await import('./lib/server/jobs');
-    if (!process.env.FOLIO_NO_JOBS) startJobs();
+    if (!process.env.SOLOFLOW_NO_JOBS) startJobs();
   }
 }

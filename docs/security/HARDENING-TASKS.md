@@ -32,14 +32,14 @@ The recommended setup is still a VPN (Tailscale or WireGuard) with nothing expos
 
 - [ ] **A3. Use a trusted client IP only**
   - Files: `src/lib/server/auth.ts`, and the new `src/lib/server/clientip.ts`.
-  - `x-forwarded-for` is currently trusted blindly. Add the env `FOLIO_TRUST_PROXY` (default off).
+  - `x-forwarded-for` is currently trusted blindly. Add the env `SOLOFLOW_TRUST_PROXY` (default off).
     - When it is off, ignore forwarded headers and use the socket address if available, else null.
     - When it is on, take the address from `cf-connecting-ip` (Cloudflare) or the right-most untrusted `x-forwarded-for` entry.
   - Use the result in `startSession` and in A1.
 
 - [ ] **A4. Make cookies HTTPS-only by default**
   - File: `src/lib/server/auth.ts`.
-  - Set `secure: true` whenever the request arrived over HTTPS (`x-forwarded-proto === 'https'` behind a trusted proxy, or `FOLIO_URL` starts with `https://`). Keep `FOLIO_SECURE_COOKIE=false` as an escape hatch for plain-HTTP LAN use.
+  - Set `secure: true` whenever the request arrived over HTTPS (`x-forwarded-proto === 'https'` behind a trusted proxy, or `SOLOFLOW_URL` starts with `https://`). Keep `SOLOFLOW_SECURE_COOKIE=false` as an escape hatch for plain-HTTP LAN use.
   - Rename the cookie to `__Host-folio_session` when it is secure.
   - Check: a sign-in through an HTTPS reverse proxy sets a `Secure` cookie.
 
@@ -68,12 +68,12 @@ The recommended setup is still a VPN (Tailscale or WireGuard) with nothing expos
     - `Referrer-Policy: same-origin`
     - `X-Content-Type-Options: nosniff`
     - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
-    - `Strict-Transport-Security: max-age=31536000`, only when `FOLIO_URL` is https.
+    - `Strict-Transport-Security: max-age=31536000`, only when `SOLOFLOW_URL` is https.
   - Check: the e2e smoke passes with no CSP console errors. The pdf.js worker (`/pdf.worker.min.mjs`) and fonts (`/pdf-fonts/`) still load.
 
 - [ ] **B2. Check where requests come from**
   - File: `src/app/api/act/route.ts`, and the other POST routes (`/api/import`, `/api/restore`).
-  - Refuse POSTs whose `Origin` header is present and doesn't match the host (or `FOLIO_URL`).
+  - Refuse POSTs whose `Origin` header is present and doesn't match the host (or `SOLOFLOW_URL`).
   - The JSON content type already forces a preflight for `/api/act`. Multipart routes don't have that protection, so this check matters most for them.
   - Check: a curl POST with `Origin: https://evil.example` returns 403.
 
@@ -85,7 +85,7 @@ The recommended setup is still a VPN (Tailscale or WireGuard) with nothing expos
   - When the setting is off, change the card text so it no longer claims the limit.
 
 - [ ] **B4. Add small limits on everything**
-  - Files: `src/app/api/act/route.ts` (refuse bodies over 2 MB), `src/app/api/import/route.ts` (already 25 MB; add at most 20 files per minute per person through `ratelimit.ts`), `src/app/api/restore/route.ts` (admin only already; add a size cap from the env `FOLIO_MAX_RESTORE_MB`, default 2048).
+  - Files: `src/app/api/act/route.ts` (refuse bodies over 2 MB), `src/app/api/import/route.ts` (already 25 MB; add at most 20 files per minute per person through `ratelimit.ts`), `src/app/api/restore/route.ts` (admin only already; add a size cap from the env `SOLOFLOW_MAX_RESTORE_MB`, default 2048).
 
 ## C. Statement files
 
@@ -109,22 +109,22 @@ The recommended setup is still a VPN (Tailscale or WireGuard) with nothing expos
 - [ ] **D2. Support Cloudflare Tunnel and Access**
   - Docs: step-by-step in `docs/security/REMOTE-ACCESS.md`, covering the `cloudflared` container, a public hostname for Folio, and an Access application with an allow policy for the owner's email.
   - Code (optional, behind an env setting):
-    - `FOLIO_CF_ACCESS_AUD` and `FOLIO_CF_ACCESS_TEAM`. When both are set, `src/middleware.ts` checks the `Cf-Access-Jwt-Assertion` header against the team's public keys (`https://<team>.cloudflareaccess.com/cdn-cgi/access/certs`) and the audience tag. A missing or invalid token returns 403.
+    - `SOLOFLOW_CF_ACCESS_AUD` and `SOLOFLOW_CF_ACCESS_TEAM`. When both are set, `src/middleware.ts` checks the `Cf-Access-Jwt-Assertion` header against the team's public keys (`https://<team>.cloudflareaccess.com/cdn-cgi/access/certs`) and the audience tag. A missing or invalid token returns 403.
     - This stops anyone reaching Folio around the tunnel. Folio's own sign-in still applies.
-    - Requests from the LAN, with no header, are allowed only when `FOLIO_CF_ACCESS_LAN_BYPASS=true` and the IP is private.
+    - Requests from the LAN, with no header, are allowed only when `SOLOFLOW_CF_ACCESS_LAN_BYPASS=true` and the IP is private.
   - Note in the docs: Cloudflare ends HTTPS at its edge, so statement uploads and balances pass through Cloudflare decrypted.
 
 - [ ] **D3. Support Authelia**
   - Docs: step-by-step in `docs/security/REMOTE-ACCESS.md` for Authelia with a reverse proxy (Nginx Proxy Manager, SWAG or Caddy) using forward auth. Cover one-factor and two-factor policy, and a Let's Encrypt certificate.
   - Code (optional):
-    - `FOLIO_TRUSTED_PROXY_IPS`, a comma-separated list. Accept `Remote-User` and `Remote-Email` headers only from those IPs.
-    - Folio does not use them to sign anyone in by default. They are only a second gate: when `FOLIO_REQUIRE_PROXY_AUTH=true`, any request without them from a non-private IP gets 403.
+    - `SOLOFLOW_TRUSTED_PROXY_IPS`, a comma-separated list. Accept `Remote-User` and `Remote-Email` headers only from those IPs.
+    - Folio does not use them to sign anyone in by default. They are only a second gate: when `SOLOFLOW_REQUIRE_PROXY_AUTH=true`, any request without them from a non-private IP gets 403.
 
 - [ ] **D4. Write a pre-exposure checklist**
   - File: `docs/security/REMOTE-ACCESS.md`, a checklist section. Each item is a tick box:
     - A1 to A7, B1 to B4, C1 and C2 done
-    - `FOLIO_URL` set to https
-    - `FOLIO_TRUST_PROXY=true`
+    - `SOLOFLOW_URL` set to https
+    - `SOLOFLOW_TRUST_PROXY=true`
     - Two-step required
     - A backup made, and a restore tested
     - `npm audit` clean, or each finding noted

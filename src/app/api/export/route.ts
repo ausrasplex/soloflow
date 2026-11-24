@@ -17,15 +17,15 @@ export async function GET(req: Request) {
   const ids = (sp.get('ids') || '').split(',').filter(Boolean).slice(0, 2000);
   const files = sp.get('files') !== '0', csv = sp.get('csv') !== '0', withDeleted = sp.get('deleted') === '1';
   const rows = await db.statement.findMany({
-    where: { ...myStatements(u.id, m.householdId, withDeleted ? null : false), ...(ids.length ? { id: { in: ids } } : {}) },
-    include: { file: true, split: { include: { loan: true } }, account: true, layoutVersion: { include: { layout: true } } },
+    where: { ...myStatements(u.id, m.businessId, withDeleted ? null : false), ...(ids.length ? { id: { in: ids } } : {}) },
+    include: { file: true, account: true, layoutVersion: { include: { layout: true } } },
     orderBy: { periodEnd: 'asc' }
   });
-  const nameOf = (s: (typeof rows)[number]) => s.split ? s.split.loan.name + (s.split.name ? ' - ' + s.split.name : '') : s.account?.name || '';
-  const head = ['Loan or account', 'Start', 'End', 'Opening', 'Closing', 'Interest', 'Credits', 'Debits', 'Rate', 'Status', 'Layout', 'File', 'Deleted'];
-  const lines = [head.join(',')].concat(rows.map((s) => [nameOf(s), day(s.periodStart), day(s.periodEnd), s.opening, s.closing, s.interest, s.credits, s.debits, s.rate, s.status, s.layoutVersion ? s.layoutVersion.layout.name + ' v' + s.layoutVersion.version : '', s.file?.name || '', day(s.deletedAt)].map(q).join(',')));
+  const nameOf = (s: (typeof rows)[number]) => s.account.name;
+  const head = ['Account', 'Start', 'End', 'Opening', 'Closing', 'Money in', 'Money out', 'Status', 'Layout', 'File', 'Deleted'];
+  const lines = [head.join(',')].concat(rows.map((s) => [nameOf(s), day(s.periodStart), day(s.periodEnd), s.opening, s.closing, s.credits, s.debits, s.status, s.layoutVersion ? s.layoutVersion.layout.name + ' v' + s.layoutVersion.version : '', s.file?.name || '', day(s.deletedAt)].map(q).join(',')));
   const stamp = new Date().toISOString().slice(0, 10);
-  if (!files) return new Response(lines.join('\n') + '\n', { headers: { 'content-type': 'text/csv', 'content-disposition': `attachment; filename="folio-statements-${stamp}.csv"` } });
+  if (!files) return new Response(lines.join('\n') + '\n', { headers: { 'content-type': 'text/csv', 'content-disposition': `attachment; filename="soloflow-statements-${stamp}.csv"` } });
   const zip = new JSZip();
   const used = new Set<string>();
   for (const s of rows) {
@@ -37,5 +37,5 @@ export async function GET(req: Request) {
   }
   if (csv) zip.file('summary.csv', lines.join('\n') + '\n');
   const out = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
-  return new Response(out as unknown as BodyInit, { headers: { 'content-type': 'application/zip', 'content-disposition': `attachment; filename="folio-statements-${stamp}.zip"` } });
+  return new Response(out as unknown as BodyInit, { headers: { 'content-type': 'application/zip', 'content-disposition': `attachment; filename="soloflow-statements-${stamp}.zip"` } });
 }

@@ -58,7 +58,7 @@ Each device gets a certificate. The front door (Cloudflare, or the reverse proxy
 - **Option A, Cloudflare:** upload the CA to Cloudflare and add a rule blocking requests without a valid client certificate. Check which Cloudflare plan this needs (see open questions).
 - **Option B, Authelia:** in Caddy, Nginx Proxy Manager or SWAG, require client certificates (`ssl_verify_client on` in Nginx, `client_auth { mode require_and_verify }` in Caddy) before forwarding to Authelia and Folio.
 - Keep a revocation list. Removing a device means revoking its certificate and reloading the proxy.
-- Folio itself needs no code changes. Optionally, the proxy passes the certificate's device name in a header, and Folio shows it in the Devices list (trusted only from `FOLIO_TRUSTED_PROXY_IPS`).
+- Folio itself needs no code changes. Optionally, the proxy passes the certificate's device name in a header, and Folio shows it in the Devices list (trusted only from `SOLOFLOW_TRUSTED_PROXY_IPS`).
 
 **Trade-off:** each new device needs a manual install. Some apps and browsers handle client certificates clumsily, especially on iOS. Passkeys (Part 1) are smoother, so Part 2 is the extra wall, not the only one.
 
