@@ -1,0 +1,8 @@
+node_modules
+.next
+.env
+tsconfig.tsbuildinfo
+tools/shots
+backups
+public/pdf.worker.min.mjs
+public/pdf-fonts

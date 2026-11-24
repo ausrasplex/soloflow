@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Statements</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input{font-family:inherit}
+a{color:inherit;text-decoration:none}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.shell{display:flex;min-height:100vh;background:var(--bg);color:var(--ink)}
+.side{width:224px;flex:none;box-sizing:border-box;padding:28px 18px;display:flex;flex-direction:column;gap:28px;position:sticky;top:0;height:100vh;align-self:flex-start;border-right:1px solid var(--line)}
+.navlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.navlink{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 14px;border-radius:12px;font-size:14px;font-weight:600;color:var(--muted)}
+.navlink.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.content{flex:1;min-width:0;padding:0 32px 48px;box-sizing:border-box}
+.topbar{position:sticky;top:0;z-index:20;margin:0 -32px 8px;padding:14px 32px;backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);background:color-mix(in srgb,var(--bg) 72%,transparent);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1100px;margin:0 auto;position:relative;display:flex;align-items:center;gap:10px}
+.panel{position:absolute;top:calc(100% + 12px);right:0;width:min(440px,100%);box-sizing:border-box;z-index:30;max-height:calc(100vh - 110px);overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.28);border:1px solid var(--line)}
+.show-m{display:none}
+.ct{font-size:11px}
+.scroll-x{overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.loancard{transition:transform .15s}
+.loancard:hover{transform:translateY(-2px)}
+@media (max-width:860px){
+.shell{flex-direction:column}
+.side{order:2;align-self:stretch;position:sticky;bottom:0;top:auto;width:auto;height:auto;padding:6px 8px;flex-direction:row;gap:0;border-right:0;border-top:1px solid var(--line);background:var(--surface);z-index:5}
+.navlist{flex-direction:row;width:100%;gap:2px;justify-content:space-between}
+.navlist li{flex:1}
+.navlink{flex-direction:column;justify-content:center;gap:2px;font-size:11px;padding:6px 2px;min-height:48px;border-radius:12px}
+.navlink.on{box-shadow:none;background:var(--navOn);color:var(--ink)}
+.content{padding:0 16px 24px}
+.topbar{margin:0 -16px 8px;padding:10px 16px}
+.panel{left:0;right:0;width:auto}
+.hide-m{display:none !important}
+.show-m{display:flex}
+.ct{font-size:20px}
+.full-m{width:100%;justify-content:center}
+}
+
+.plus{position:relative}
+.plus>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;border-radius:999px;background:var(--primary);color:var(--primaryInk);font-size:14px;font-weight:700;box-shadow:0 6px 16px rgba(0,0,0,.22)}
+.plus>summary::-webkit-details-marker{display:none}
+.plus[open]>summary::after{content:"";position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:40;cursor:default}
+.plus[open]>summary svg{transform:rotate(45deg)}
+.plus>summary svg{transition:transform .15s}
+.plus-menu{position:fixed;left:240px;bottom:96px;width:320px;box-sizing:border-box;z-index:50;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:10px;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:2px}
+.plus-menu a{display:flex;align-items:center;gap:14px;min-height:56px;padding:8px 12px;border-radius:16px;color:var(--ink)}
+.plus-menu a:hover{background:var(--surface2)}
+.plus-menu .pi{flex:none;width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--onA)}
+.plus-menu b{display:block;font-size:14px;font-weight:700}
+.plus-menu span.d{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:1px}
+@media (max-width:860px){
+.side{z-index:25}
+.plus>summary{width:56px;height:56px;margin:-18px auto 0;padding:0}
+.plus>summary .lbl{display:none}
+.plus-menu{left:16px;right:16px;bottom:84px;width:auto}
+}
+
+.field{width:100%;box-sizing:border-box;min-height:48px;padding:0 16px;border:1px solid var(--outline);border-radius:14px;background:var(--surface);color:var(--ink);font-size:16px;font-family:inherit}
+.card{background:var(--surface);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:48px;padding:0 24px;border:0;border-radius:999px;background:var(--primary);color:var(--primaryInk);font-size:14px;font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.bell{position:relative;flex:none;width:44px;height:44px;border:0;border-radius:50%;background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .15s ease}
+.bell .badge{position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;box-sizing:border-box;padding:0 5px;border-radius:999px;background:var(--danger);color:var(--bg);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+@media (hover:hover){.bell:hover{background:var(--surface2)}}
+.nitem{display:flex;gap:12px;padding:12px;border-radius:16px;color:var(--ink);text-decoration:none}
+.nitem:hover{background:var(--surface2)}
+.btnd{border-color:var(--danger)!important;color:var(--danger)!important}
+.btnd:hover{background:var(--dangerSoft)}
+.btn2{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:48px;padding:0 22px;border:1px solid var(--outline);border-radius:999px;background:transparent;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:var(--ink)}
+.chip:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.h2{margin:0;font-size:18px;font-weight:700}
+.sub{font-size:13px;color:var(--muted);margin-top:2px}
+@media (max-width:860px){.card{padding:18px}}
+/* hover: one set of rules for every control (pointer devices only) */
+@media (hover:hover){
+a,button,summary{transition:background-color .15s ease,box-shadow .15s ease,border-color .15s ease,transform .15s ease}
+.btn:not(:disabled):hover,:is(a,button)[style*="background:var(--primary)"]:not(:disabled):hover{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--primaryInk) 14%,transparent)!important}
+.btn2:not(:disabled):hover,:is(a,button)[style*="background:transparent"][style*="border:1px solid var(--outline)"]:not(:disabled):hover,:is(a,button)[style*="border-radius:999px"][style*="background:var(--surface)"]:hover{background:var(--surface2)!important}
+.btn2.btnd:hover{background:var(--dangerSoft)!important}
+.navlink:not(.on):hover{background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--ink)}
+.dots>summary:hover{background:color-mix(in srgb,var(--ink) 10%,var(--surface2))}
+}
+/* Add button: first in the desktop menu; hover fades smoothly */
+.plus>summary{box-shadow:0 6px 16px rgba(0,0,0,.22),inset 0 0 0 999px transparent}
+@media (hover:hover){.plus>summary:hover{box-shadow:0 6px 16px rgba(0,0,0,.22),inset 0 0 0 999px color-mix(in srgb,var(--primaryInk) 14%,transparent)!important}}
+@media (min-width:861px){
+.navlist>li:has(>details.plus){order:-1;margin-bottom:10px}
+.plus-menu{top:84px;bottom:auto;left:248px}
+}
+html{scrollbar-gutter:stable;overflow-y:scroll}
+@keyframes sheetin{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes drawerin{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+.dsheetbg{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45)}
+.dsheet{position:fixed;left:0;right:0;bottom:0;z-index:61;box-sizing:border-box;width:min(520px,100%);margin:0 auto;background:var(--surface);border-radius:24px 24px 0 0;padding:10px 16px 20px;box-shadow:0 -12px 40px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:6px;animation:sheetin .2s ease-out;max-height:85vh;overflow:auto}
+.dsheet .grab{align-self:center;width:40px;height:4px;border-radius:2px;background:var(--outline);margin-bottom:8px}
+@media (min-width:861px){.dsheet{left:auto;right:0;top:0;bottom:0;width:380px;margin:0;border-radius:24px 0 0 24px;max-height:none;padding:24px 20px;box-shadow:-12px 0 40px rgba(0,0,0,.28);animation:drawerin .2s ease-out}.dsheet .grab{display:none}}
+.dhead{display:flex;align-items:center;gap:8px;padding:0 4px 6px}
+.xbtn{flex:none;box-sizing:border-box;margin-left:auto;width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:var(--surface2);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .15s linear,color .15s linear}
+@media (hover:hover){.xbtn:hover{background:color-mix(in srgb,var(--ink) 10%,var(--surface2));color:var(--ink)}}
+.dfoot{display:flex;gap:10px;margin-top:10px}
+.dsheet .dfoot,.nsheet .dfoot{position:sticky;bottom:0;z-index:1;margin-top:auto;padding:12px 0 20px;background:var(--surface);border-top:1px solid var(--line)}
+.dsheet:has(>.dfoot),.nsheet:has(>.dfoot){padding-bottom:0}
+@media (min-width:861px){.dsheet .dfoot,.nsheet .dfoot{padding-bottom:24px}}
+.fchip{flex:none;min-height:44px;padding:0 16px;border-radius:999px;font:600 14px "Plus Jakarta Sans",sans-serif;cursor:pointer;transition:background-color .15s linear}
+@media (hover:hover){.fchip[aria-pressed="false"]:hover{background:var(--surface2)!important}}
+@media (max-width:860px){.iconm{width:44px;padding:0!important;justify-content:center}.fbadge{position:absolute;top:-4px;right:-4px}}
+.selbox{flex:none;width:24px;height:24px;box-sizing:border-box;padding:0;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.selbox::after{content:"";position:absolute;inset:-10px}
+button.btn2:disabled{opacity:.45;cursor:default}
+.btnp{flex:1;min-height:48px;border:0;border-radius:999px;background:var(--primary);color:var(--primaryInk);font:700 14px "Plus Jakarta Sans",sans-serif;cursor:pointer}
+.btnp:disabled{opacity:.45;cursor:default}
+.fld{display:flex;flex-direction:column;gap:6px;padding:6px 4px}
+.flab{font-size:13px;font-weight:700;color:var(--muted)}
+.chk{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 12px;border-radius:12px;background:var(--surface2);font-size:14px;font-weight:600;cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--sel);margin:0}
+@media (hover:hover){.hb2:not(:disabled):hover,.hbs:hover{background:var(--surface2)!important}.hbp:not(:disabled):hover{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--primaryInk) 14%,transparent)!important}}
+.hb2,.hbs,.hbp{transition:background-color .15s linear,box-shadow .15s linear}
+.sheetopt{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 14px;border:2px solid transparent;border-radius:16px;background:var(--surface2);color:var(--ink);text-align:left;font-family:inherit;cursor:pointer;transition:background-color .15s linear}
+.sheetopt.on{border-color:var(--sel)}
+@media (hover:hover){.sheetopt:hover{background:var(--t1)}}
+.fin{box-sizing:border-box;width:100%;min-height:48px;padding:0 14px;border:1px solid var(--outline);border-radius:12px;background:var(--surface);color:var(--ink);font:500 16px "Plus Jakarta Sans",sans-serif;transition:border-color .15s linear}
+.fin:focus{outline:2px solid var(--sel);outline-offset:1px}
+@media (hover:hover){.fin:hover{border-color:var(--sel)}}
+.dpbtn{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;cursor:pointer}
+.dots{position:relative;flex:none}
+.dots>summary{list-style:none;cursor:pointer;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--surface);transition:background-color .15s linear}
+.dots>summary::-webkit-details-marker{display:none}
+.dots[open]>summary::after{content:"";position:fixed;inset:0;z-index:40;cursor:default}
+.dots-menu{position:absolute;right:0;top:50px;z-index:50;width:240px;box-sizing:border-box;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:20px;padding:8px;box-shadow:0 12px 32px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.dots-menu .gl{padding:8px 12px 4px;font-size:12px;font-weight:600;color:var(--muted)}
+.dots-menu .gl:not(:first-child){margin-top:4px;border-top:1px solid var(--line);padding-top:12px}
+.dots-menu button{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border:0;border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer;transition:background-color .15s linear}
+@media (hover:hover){.dots-menu button:hover{background:var(--surface2)}}
+.dots-menu .danger{color:var(--danger)}
+@media (hover:hover){.dots-menu .danger:hover{background:var(--dangerSoft)}}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:860px){.g3{grid-template-columns:1fr}}
+.dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;box-sizing:border-box;padding:26px 20px;border:2px dashed var(--outline);border-radius:24px;background:transparent;color:var(--ink);font:inherit;text-align:center;cursor:pointer;transition:background-color .15s linear,border-color .15s linear}
+@media (hover:hover){.dropzone:hover{background:var(--surface);border-color:var(--sel)}}
+.sgroup{background:var(--surface);border-radius:24px;padding:16px 20px}
+.sgroup>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:44px}
+.sgroup>summary::-webkit-details-marker{display:none}
+.sgroup[open] .archchev{transform:rotate(180deg)}
+.archchev{transition:transform .15s ease;color:var(--muted)}
+.srow{display:flex;align-items:center;gap:12px;padding:4px 4px 4px 12px;border:1px solid var(--line);border-radius:14px}
+.sopen{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:10px 8px;margin:0;border:0;border-radius:10px;background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:background-color .15s linear}
+.sopen:disabled{cursor:default}
+@media (hover:hover){.sopen:not(:disabled):hover{background:var(--surface2)}}
+.cardarrow{transition:transform .15s ease,color .15s linear}
+@media (hover:hover){.cardopen:not(:disabled):hover .cardarrow{transform:translateX(4px);color:var(--ink)!important}}
+.arch>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;font-size:18px;font-weight:700}
+.arch>summary::-webkit-details-marker{display:none}
+.arch[open] .archchev{transform:rotate(180deg)}
+.archrow{display:flex;align-items:center;gap:12px;padding:12px;margin:0;border:1px solid var(--line);border-radius:14px;color:var(--ink)}
+.rowlist>*:first-child{border-top:0!important}
+.lnk{color:var(--ink);text-decoration:underline;text-decoration-color:var(--outline);text-underline-offset:3px;transition:text-decoration-color .15s linear}
+@media (hover:hover){.lnk:hover{text-decoration-color:currentColor}}
+.dots-menu a{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:12px;color:var(--ink);font-size:14px;font-weight:600;text-decoration:none;transition:background-color .15s linear}
+@media (hover:hover){.dots-menu a:hover{background:var(--surface2)}}
+.addpulse{animation:addpulse 1.8s ease-out infinite}
+@keyframes addpulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--add) 85%,transparent)}70%,100%{box-shadow:0 0 0 16px color-mix(in srgb,var(--add) 0%,transparent)}}
+@media (prefers-reduced-motion:reduce){.addpulse{animation:none;box-shadow:0 0 0 5px var(--add)}}
+button.btn2:disabled{opacity:.45;cursor:default}
+.fld{position:relative}
+@media (min-width:861px){.side{z-index:30}}
+.txrow{display:flex;align-items:center;gap:12px;width:100%;padding:11px 8px;margin:0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:background-color .15s linear}
+@media (hover:hover){.txrow:hover{background:var(--surface2)}}
+.rbtn{flex:none;width:40px;height:40px;box-sizing:border-box;border:1px solid var(--outline);border-radius:50%;background:var(--surface);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .15s linear}
+.rbtn:disabled{opacity:.4;cursor:default}
+@media (hover:hover){.rbtn:not(:disabled):hover{background:var(--surface2)}}
+.pdfstage{flex:1;min-width:0;overflow:auto;background:var(--surface2);border-radius:18px;padding:20px;display:flex;justify-content:center;max-height:780px}
+.paper{flex:none;box-sizing:border-box;max-width:none;aspect-ratio:210/297;background:#fff;color:#1d1d1f;font-family:Helvetica,Arial,sans-serif;line-height:1.35;padding:3.2em 3em;border-radius:4px;box-shadow:0 2px 14px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.ptable{display:grid;grid-template-columns:auto 1fr auto auto auto;column-gap:1.2em}
+.ptable .ph{font-weight:700;padding:.4em .2em;border-bottom:1px solid #999}
+.ptable .pc{padding:.28em .2em;border-bottom:1px solid #eee;white-space:nowrap}
+.ptable .r,.csvgrid .r{text-align:right;font-variant-numeric:tabular-nums}
+.thumb{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px;border:2px solid transparent;border-radius:10px;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.thumb.on{border-color:var(--sel)}
+@media (hover:hover){.thumb:hover{background:var(--surface)}}
+.thumbpg{width:56px;aspect-ratio:210/297;box-sizing:border-box;background:#fff;border-radius:2px;box-shadow:0 1px 4px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:4px;padding:8px 6px}
+.thumbpg span{height:3px;border-radius:2px;background:#d6d6d6}
+.thumbpg span:first-child{width:60%;background:#bbb}
+.csvgrid{display:grid;grid-template-columns:auto 1fr auto auto;background:#fff;color:#1d1d1f;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.15);min-width:520px;align-self:flex-start}
+.csvgrid .ch{font-weight:700;padding:6px 10px;border-bottom:1px solid #999;background:#f2f2f2}
+.csvgrid .cc{padding:5px 10px;border-bottom:1px solid #eee;white-space:nowrap}
+.fwrap{position:relative;flex:none;display:inline-flex}
+.fclear{position:absolute;top:-7px;right:-7px;z-index:1;width:22px;height:22px;padding:0;box-sizing:border-box;border:2px solid var(--bg);border-radius:999px;background:var(--primary);color:var(--primaryInk);font:700 12px "Plus Jakarta Sans",sans-serif;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.fclear::after{content:"";position:absolute;inset:-8px}
+.fclear .fx{display:none}
+.fclear .fn{display:inline-flex;align-items:center;justify-content:center;width:100%;height:100%;overflow:hidden}
+@media (hover:none){.fclear .fn{display:none}.fclear .fx{display:inline-flex}.fclear{background:var(--danger);color:#fff}}
+@media (hover:hover){.fclear:hover,.fclear:focus-visible{background:var(--danger);color:#fff}.fclear:hover .fn,.fclear:focus-visible .fn{display:none}.fclear:hover .fx,.fclear:focus-visible .fx{display:inline-flex}}
+.fsbox.fs{position:fixed;inset:0;z-index:75;margin:0;border-radius:0;box-sizing:border-box;overflow:auto;background:var(--surface);padding:16px 20px 24px}
+.fsbox.fs .pdfstage{max-height:calc(100vh - 96px)}
+@media (max-width:860px){.fsbox.fs{padding:12px}}
+.footlnk{color:inherit;text-decoration:none;border-radius:6px;padding:2px 4px}
+@media (hover:hover){.footlnk:hover{color:var(--ink);text-decoration:underline}}
+</style>
+</helmet>
+<div class="shell" style="{{themeVars}};font-family:'Plus Jakarta Sans',system-ui,sans-serif">
+
+<aside class="side">
+<a class="hide-m homebtn" href="Loans.dc.html" aria-label="Folio home" style="display:flex;align-items:center;gap:10px;padding:0 6px;color:var(--ink);text-decoration:none">
+<span style="flex:none;width:32px;height:32px;border-radius:10.5px;background:#2b2849;display:flex;align-items:center;justify-content:center"><svg width="17" height="19" viewBox="0 0 572.216 649.217" aria-hidden="true"><path fill="#b8a5fa" d="M572.216 0 C560.88 58.068 540.627 102.088 496.7 142.883 C351.76 277.487 179.777 143.437 48.423 277.681 C32.362 294.095 6.037 323.378 2.138 346.212 C1.966 344.658 -22.589 177.057 99.192 69.24 C191.291 -12.298 281.316 2.867 394.064 2.725 C453.786 2.649 512.611 1.057 572.216 0 Z"/><path fill="#fddcb4" d="M460.872 250.454 C451.759 297.135 435.478 332.522 400.166 365.317 C283.65 473.524 145.394 365.762 39.799 473.68 C26.888 486.875 5.725 510.415 2.591 528.771 C2.453 527.522 -17.287 392.789 80.612 306.116 C154.65 240.568 227.02 252.759 317.658 252.645 C365.668 252.584 412.957 251.304 460.872 250.454 Z"/><path fill="#e8fb4f" d="M236.562 454.024 C228.75 544.394 181.748 617.37 90.065 639.177 C60.67 646.168 30.667 645.539 0.872 649.217 C4.484 566.748 52.822 493.51 133.466 468.867 C166.758 458.694 202.108 457.18 236.562 454.024 Z"/></svg></span>
+<span style="font-weight:700;font-size:17px;line-height:32px;letter-spacing:-0.01em">Folio</span>
+</a>
+<ul class="navlist">
+<li><a class="navlink" href="Loans.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>Loans</a></li>
+<li><a class="navlink" href="Accounts.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /><path d="M6 14h2" /></svg>Accounts</a></li>
+<li><details class="plus"><summary aria-label="Add"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14" /><path d="M12 5v14" /></svg><span class="lbl">Add</span></summary><div class="plus-menu"><a href="Setup.dc.html"><span class="pi" style="background:var(--a1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg></span><span><b>Add a loan</b><span class="d">Splits, borrowers and offset</span></span></a><a href="AddAccount.dc.html"><span class="pi" style="background:var(--a2)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /><path d="M6 14h2" /></svg></span><span><b>Add an account</b><span class="d">Everyday or savings, offset link</span></span></a><a href="Statements.dc.html"><span class="pi" style="background:var(--a3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg></span><span><b>Import a statement</b><span class="d">PDF or CSV for a loan or account</span></span></a><a href="Main.dc.html"><span class="pi" style="background:var(--a2)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M8 12h8" /><path d="M12 8v8" /></svg></span><span><b>Record a change</b><span class="d">Rate rise or new repayment amount</span></span></a></div></details></li>
+<li><a class="navlink on" href="Statements.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /><path d="M14 2v5a1 1 0 0 0 1 1h5" /></svg>Statements</a></li>
+<li><a class="navlink" href="Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" /><circle cx="12" cy="12" r="3" /></svg>Settings</a></li>
+</ul>
+<div class="hide-m" style="margin-top:auto">
+<a class="navlink" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 17 5-5-5-5" /><path d="M21 12H9" /><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /></svg>Log out</a>
+</div>
+</aside>
+
+<div class="content">
+<header class="topbar" style="{{topStyle}}">
+<div class="topbar-in">
+<a class="show-m" href="Loans.dc.html" aria-label="Folio home" style="width:40px;height:40px;border-radius:13px;background:#2b2849;align-items:center;justify-content:center;flex:none"><svg width="21" height="24" viewBox="0 0 572.216 649.217" aria-hidden="true"><path fill="#b8a5fa" d="M572.216 0 C560.88 58.068 540.627 102.088 496.7 142.883 C351.76 277.487 179.777 143.437 48.423 277.681 C32.362 294.095 6.037 323.378 2.138 346.212 C1.966 344.658 -22.589 177.057 99.192 69.24 C191.291 -12.298 281.316 2.867 394.064 2.725 C453.786 2.649 512.611 1.057 572.216 0 Z"/><path fill="#fddcb4" d="M460.872 250.454 C451.759 297.135 435.478 332.522 400.166 365.317 C283.65 473.524 145.394 365.762 39.799 473.68 C26.888 486.875 5.725 510.415 2.591 528.771 C2.453 527.522 -17.287 392.789 80.612 306.116 C154.65 240.568 227.02 252.759 317.658 252.645 C365.668 252.584 412.957 251.304 460.872 250.454 Z"/><path fill="#e8fb4f" d="M236.562 454.024 C228.75 544.394 181.748 617.37 90.065 639.177 C60.67 646.168 30.667 645.539 0.872 649.217 C4.484 566.748 52.822 493.51 133.466 468.867 C166.758 458.694 202.108 457.18 236.562 454.024 Z"/></svg></a>
+<button class="hbs" type="button" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:0;border-radius:999px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer">{{hhLabel}}
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--muted)"><path d="m6 9 6 6 6-6" /></svg>
+</button>
+<div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+<button type="button" class="bell" onClick="{{toggleNotifs}}" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0" /><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg><sc-if value="{{hasUnread}}" hint-placeholder-val="{{true}}"><span class="badge">{{unreadCount}}</span></sc-if></button>
+<a href="Profile.dc.html" style="width:44px;height:44px;border-radius:50%;background:var(--a1);color:var(--onA);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700" aria-label="Your profile">AL</a>
+</div>
+<sc-if value="{{notifsOpen}}" hint-placeholder-val="{{false}}">
+<div class="panel" role="dialog" aria-label="Notifications" style="background:var(--surface);color:var(--ink);border-radius:24px;padding:10px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 12px 8px"><span style="font-size:16px;font-weight:700">Notifications</span><button type="button" class="btn2" style="min-height:36px;padding:0 14px;font-size:13px;font-weight:600;font-family:inherit;border-radius:999px;border:1px solid var(--outline);background:transparent;color:var(--ink);cursor:pointer" onClick="{{markAll}}">Mark all read</button></div>
+<sc-if value="{{allRead}}" hint-placeholder-val="{{false}}"><div style="padding:6px 12px 10px;font-size:13px;color:var(--muted)">You are all caught up.</div></sc-if>
+<sc-for list="{{notifs}}" as="n" hint-placeholder-count="3">
+<a class="nitem" href="{{n.href}}" onClick="{{n.open}}">
+<span style="{{n.dot}};flex:none;width:10px;height:10px;border-radius:50%;margin-top:6px"></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:14px;font-weight:700">{{n.title}}</span><span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;{{n.tagStyle}}">{{n.tag}}</span></span><span style="font-size:13px;color:var(--muted);line-height:1.4">{{n.text}}</span><span style="font-size:12px;color:var(--muted)">{{n.when}}</span></span>
+</a>
+</sc-for>
+</div>
+</sc-if>
+
+
+</div>
+</header>
+<sc-if value="{{exOn}}" hint-placeholder-val="{{false}}">
+<div class="dsheetbg" onClick="{{closeExport}}"></div>
+<div class="dsheet" role="dialog" aria-modal="true" aria-label="Export statements">
+<span class="grab"></span>
+<div class="dhead"><span style="flex:1;font-size:18px;font-weight:700">Export Statements</span><button type="button" class="xbtn" aria-label="Close" onClick="{{closeExport}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button></div>
+<div class="fld"><span class="flab">Include</span><sc-for list="{{exChecks}}" as="c" hint-placeholder-count="3"><label class="chk"><input type="checkbox" checked="{{c.on}}" onChange="{{c.toggle}}"><span style="flex:1">{{c.t}}</span><span style="font-size:12px;color:var(--muted);font-weight:500">{{c.d}}</span></label></sc-for></div>
+<span style="font-size:13px;color:var(--muted);font-weight:500;padding:0 4px">{{exNote}}</span>
+<div class="dfoot"><button type="button" class="btnp" disabled="{{exBad}}" onClick="{{exGo}}">Download</button></div>
+</div>
+</sc-if>
+<sc-if value="{{fSheetOn}}" hint-placeholder-val="{{false}}">
+<div class="dsheetbg" onClick="{{closeFilters}}"></div>
+<div class="dsheet" role="dialog" aria-modal="true" aria-label="Filter statements">
+<span class="grab"></span>
+<div class="dhead"><span style="flex:1;font-size:18px;font-weight:700">Filters</span><button type="button" class="xbtn" aria-label="Close" onClick="{{closeFilters}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button></div>
+<sc-for list="{{fGroups}}" as="g" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;gap:8px;padding:8px 4px"><div style="font-size:13px;font-weight:700;color:var(--muted)">{{g.title}}</div><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{g.opts}}" as="o" hint-placeholder-count="3"><button type="button" aria-pressed="{{o.sel}}" class="fchip" style="{{o.style}}" onClick="{{o.pick}}">{{o.t}}</button></sc-for></div></div></sc-for>
+<div class="dfoot"><sc-if value="{{filtersOn}}" hint-placeholder-val="{{false}}"><button type="button" class="btn2" style="flex:none;min-height:48px;padding:0 20px" onClick="{{clearFilters}}">Clear</button></sc-if><button class="hbp" type="button" style="flex:1;min-height:48px;border:0;border-radius:999px;background:var(--primary);color:var(--primaryInk);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer" onClick="{{closeFilters}}">{{showLabel}}</button></div>
+</div>
+</sc-if>
+<sc-if value="{{notifsOpen}}" hint-placeholder-val="{{false}}"><div onClick="{{toggleNotifs}}" style="position:fixed;inset:0;z-index:19"></div></sc-if>
+
+<sc-if value="{{lyOn}}" hint-placeholder-val="{{false}}">
+<div class="dsheetbg" onClick="{{closeLy}}"></div>
+<div class="dsheet" role="dialog" aria-modal="true" aria-label="Layout">
+<span class="grab"></span>
+<div class="dhead"><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:18px;font-weight:700">Layout</span><span style="font-size:12px;color:var(--muted);font-weight:500">{{lySub}}</span></span><button type="button" class="xbtn" aria-label="Close" onClick="{{closeLy}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button></div>
+<div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{lyOpts}}" as="o" hint-placeholder-count="4"><button type="button" class="sheetopt {{o.cls}}" style="min-height:56px" aria-pressed="{{o.sel}}" onClick="{{o.pick}}"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:15px;font-weight:700">{{o.t}}</span><sc-if value="{{o.auto}}" hint-placeholder-val="{{false}}"><span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:var(--t3)">Matched</span></sc-if></span><span style="font-size:12px;color:var(--muted);font-weight:500">{{o.d}}</span></span><sc-if value="{{o.sel}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:var(--sel)"><path d="M20 6 9 17l-5-5" /></svg></sc-if></button></sc-for></div>
+<div style="font-size:12px;color:var(--muted);line-height:1.5;padding:4px">Folio checks every version of every layout and picks the one that fits. Choose another only if the match looks wrong; the file is read again and must pass the checks.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{destOn}}" hint-placeholder-val="{{false}}">
+<div class="dsheetbg" onClick="{{closeDest}}"></div>
+<div class="dsheet" role="dialog" aria-modal="true" aria-label="Goes to">
+<span class="grab"></span>
+<div class="dhead"><span style="flex:1;font-size:18px;font-weight:700">Goes To</span><button type="button" class="xbtn" aria-label="Close" onClick="{{closeDest}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button></div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{destOpts}}" as="o" hint-placeholder-count="6"><button type="button" class="sheetopt {{o.cls}}" style="min-height:56px" aria-pressed="{{o.sel}}" onClick="{{o.pick}}"><span style="{{o.icon}}"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:700">{{o.t}}</span><span style="font-size:12px;color:var(--muted);font-weight:500">{{o.d}}</span></span><sc-if value="{{o.sel}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:var(--sel)"><path d="M20 6 9 17l-5-5" /></svg></sc-if></button></sc-for>
+</div>
+</div>
+</sc-if>
+
+<div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:20px;padding-top:12px">
+
+<sc-if value="{{showList}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px"><h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-0.02em">Statements</h1><sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}"><span style="position:relative;flex:none;display:flex"><button class="hbp {{addPulse}}" type="button" onClick="{{choose}}" aria-label="Import statements" style="flex:none;width:44px;height:44px;border:0;border-radius:50%;background:var(--primary);color:var(--primaryInk);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg></button><sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}"><svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;top:calc(100% + 6px);right:12px;pointer-events:none;stroke:var(--primary)"><path d="M6 56 C 10 32, 26 14, 47 6" /><path d="M36 3 L 48 5 L 43 16" /></svg></sc-if></span></sc-if></div>
+<div style="font-size:14px;color:var(--muted)">{{subtitle}}</div>
+</div>
+
+<sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+<section style="background:var(--surface);border-radius:24px;padding:40px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+<h2 style="margin:0;font-size:22px;font-weight:700">Import Your First Statement</h2>
+<div style="font-size:14px;color:var(--muted);max-width:460px">Use the button above to add a PDF or CSV statement for a loan or account. Files are read on your server and never leave it.</div>
+</section>
+</sc-if>
+
+<sc-if value="{{isReview}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<section style="background:var(--hero);color:var(--heroInk);border-radius:24px;padding:20px 22px;display:flex;flex-direction:column;gap:6px">
+<div style="font-size:13px;color:var(--heroMuted)">Review before importing</div>
+<div style="font-size:20px;font-weight:700">{{revTitle}}</div>
+<div style="font-size:13px;color:var(--heroMuted)">Nothing is saved until you confirm.</div>
+</section>
+
+<section class="card">
+<div style="display:flex;align-items:center;gap:12px">
+<span style="flex:none;width:48px;height:48px;border-radius:16px;background:var(--a2);color:var(--onA);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /><path d="M14 2v5a1 1 0 0 0 1 1h5" /></svg></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-size:16px;font-weight:700;word-break:break-all">{{file1}}</span><span style="font-size:12px;color:var(--muted)">{{file1Meta}}</span></span>
+<span class="chip" style="{{f1.chip}}">{{f1.chipText}}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:var(--surface2);border-radius:18px;padding:16px;font-size:13px;line-height:1.5"><sc-for list="{{f1.checks}}" as="c" hint-placeholder-count="3"><div style="display:flex;gap:10px;align-items:flex-start"><sc-if value="{{c.good}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:var(--sel);margin-top:1px"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg></sc-if><sc-if value="{{c.bad}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:#c27a12;margin-top:1px"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg></sc-if><span>{{c.text}}</span></div></sc-for></div>
+<div class="fld" style="padding:0"><span class="flab" id="lyLabf1">Layout</span><button type="button" class="fin dpbtn" aria-haspopup="dialog" aria-labelledby="lyLabf1" onClick="{{f1.openLy}}"><span style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0"><span style="font-size:15px;font-weight:600">{{f1.lyName}}</span><span style="font-size:12px;color:var(--muted);font-weight:500">{{f1.lyMeta}}</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:var(--muted)"><path d="m6 9 6 6 6-6" /></svg></button><sc-if value="{{f1.lyOff}}" hint-placeholder-val="{{false}}"><div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--t2);font-size:13px;font-weight:600"><span style="flex:1 1 220px;line-height:1.5">{{f1.lyOffText}}</span><button type="button" class="btn2 on2" style="min-height:40px;padding:0 14px;font-size:13px" onClick="{{f1.lyReset}}">Use {{f1.autoShort}}</button></div></sc-if></div>
+<div class="fld" style="padding:0"><span class="flab" id="destLab">Goes to</span><button type="button" class="fin dpbtn" aria-haspopup="dialog" aria-labelledby="destLab" onClick="{{openDest}}"><span style="display:flex;flex-direction:column;align-items:flex-start;gap:1px"><span style="font-size:15px;font-weight:600">{{destName}}</span><span style="font-size:12px;color:var(--muted);font-weight:500">{{destKind}}</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:var(--muted)"><path d="m6 9 6 6 6-6" /></svg></button></div>
+
+<div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px">
+<div style="font-size:14px;font-weight:600">{{linkQ}}</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button type="button" onClick="{{linkYes}}" aria-pressed="{{linkIsYes}}" style="min-height:48px;padding:0 20px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;{{yesPill}}">Yes, link them</button>
+<button type="button" onClick="{{linkNo}}" aria-pressed="{{linkIsNo}}" style="min-height:48px;padding:0 20px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;{{noPill}}">No, I will choose</button>
+</div>
+<sc-if value="{{linkIsNo}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-size:13px;color:var(--muted)">Pick at least one person.</div>
+<div class="g3">
+<sc-for list="{{people}}" as="c" hint-placeholder-count="3">
+<button type="button" class="sheetopt {{c.cls}}" style="min-height:56px" aria-pressed="{{c.on}}" onClick="{{c.toggle}}"><span style="{{c.av}}">{{c.ini}}</span><span style="flex:1;min-width:0;font-size:15px;font-weight:700">{{c.name}}</span><span aria-hidden="true" style="flex:none;width:24px;height:24px;box-sizing:border-box;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;{{c.box}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="{{c.tickStyle}}"><path d="M20 6 9 17l-5-5" /></svg></span></button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{destIsLoan}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px">
+<div style="font-size:14px;font-weight:600">One change to confirm</div>
+<div style="font-size:13px;color:var(--muted);line-height:1.5">This statement shows a rate change. It will be added to the rate history and used in forecasts.</div>
+<label class="chk"><input type="checkbox" checked="{{rateOk}}" onChange="{{toggleRate}}">Add this rate change</label>
+</div>
+</sc-if>
+</section>
+
+<section class="card">
+<div style="display:flex;align-items:center;gap:12px"><span style="flex:none;width:48px;height:48px;border-radius:16px;background:var(--a1);color:var(--onA);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /><path d="M14 2v5a1 1 0 0 0 1 1h5" /></svg></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-size:16px;font-weight:700;word-break:break-all">{{f2.file}}</span><span style="font-size:12px;color:var(--muted)">{{f2.meta}}</span></span><span class="chip" style="{{f2.chip}}">{{f2.chipText}}</span></div>
+<sc-if value="{{f2.inc}}" hint-placeholder-val="{{true}}">
+<div style="font-size:13px;color:var(--muted);line-height:1.5">{{f2.note}}</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:var(--surface2);border-radius:18px;padding:16px;font-size:13px;line-height:1.5"><sc-for list="{{f2.checks}}" as="c" hint-placeholder-count="3"><div style="display:flex;gap:10px;align-items:flex-start"><sc-if value="{{c.good}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:var(--sel);margin-top:1px"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg></sc-if><sc-if value="{{c.bad}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:#c27a12;margin-top:1px"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg></sc-if><span>{{c.text}}</span></div></sc-for></div>
+<div class="fld" style="padding:0"><span class="flab" id="lyLabf2">Layout</span><button type="button" class="fin dpbtn" aria-haspopup="dialog" aria-labelledby="lyLabf2" onClick="{{f2.openLy}}"><span style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0"><span style="font-size:15px;font-weight:600">{{f2.lyName}}</span><span style="font-size:12px;color:var(--muted);font-weight:500">{{f2.lyMeta}}</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:var(--muted)"><path d="m6 9 6 6 6-6" /></svg></button><sc-if value="{{f2.lyOff}}" hint-placeholder-val="{{false}}"><div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--t2);font-size:13px;font-weight:600"><span style="flex:1 1 220px;line-height:1.5">{{f2.lyOffText}}</span><button type="button" class="btn2 on2" style="min-height:40px;padding:0 14px;font-size:13px" onClick="{{f2.lyReset}}">Use {{f2.autoShort}}</button></div></sc-if></div>
+<div class="fld" style="padding:0"><span class="flab">Goes to</span><div style="display:flex;flex-direction:column;gap:1px;padding:10px 14px;border-radius:12px;background:var(--surface2)"><span style="font-size:15px;font-weight:600">{{f2.dest}}</span><span style="font-size:12px;color:var(--muted);font-weight:500">Matched by the account number on the statement</span></div></div>
+</sc-if>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn2" onClick="{{f2.skip}}">{{f2.skipLabel}}</button></div>
+</section>
+
+<section class="card">
+<div style="display:flex;align-items:center;gap:12px">
+<span style="flex:none;width:48px;height:48px;border-radius:16px;background:var(--a3);color:var(--onA);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /><path d="M14 2v5a1 1 0 0 0 1 1h5" /></svg></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-size:16px;font-weight:700;word-break:break-all">transactions-export.csv</span><span style="font-size:12px;color:var(--muted)">Sample Credit Union</span></span>
+<span class="chip" style="background:var(--t2)">Layout not recognised</span>
+</div>
+<div style="font-size:13px;color:var(--muted);line-height:1.5">The columns in this file don't match a saved layout. Map it once and future files will match automatically.</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a href="Settings.dc.html" onClick="{{goLayouts}}" class="btn2">Map this layout</a><button type="button" class="btn2" onClick="{{skipFile}}">{{skipLabel}}</button></div>
+</section>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+<button type="button" class="btn" disabled="{{cantConfirm}}" onClick="{{confirm}}">{{importLabel}}</button>
+<sc-if value="{{notAsking}}" hint-placeholder-val="{{true}}">
+<button type="button" class="btn2 btnd" onClick="{{askDiscard}}">Discard</button>
+<span style="font-size:13px;color:var(--muted)">{{hint}}</span>
+</sc-if>
+<sc-if value="{{asking}}" hint-placeholder-val="{{false}}">
+<span style="flex:1 1 160px;font-size:14px;font-weight:600;color:var(--danger)">Discard this import?</span>
+<button type="button" class="btn2" onClick="{{cancelAsk}}">Keep</button>
+<button type="button" class="btn2 btnd" onClick="{{discard}}">Discard</button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+<section role="status" style="background:var(--t3);border-radius:24px;padding:18px 22px;font-size:14px;font-weight:600;line-height:1.5">{{doneText}}</section>
+</sc-if>
+
+<sc-if value="{{notEmpty}}" hint-placeholder-val="{{true}}">
+<sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}">
+<button type="button" class="dropzone hide-m" onClick="{{choose}}"><span style="font-size:15px;font-weight:700">Drop PDF or CSV statements here, or click to choose</span><span style="font-size:13px;color:var(--muted);font-weight:500">Several at once is fine, even for different loans and accounts. Files are read on your server and never leave it.</span></button>
+</sc-if>
+
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+<span style="font-size:13px;color:var(--muted);font-weight:600">{{filterSummary}}</span>
+<span style="display:flex;align-items:center;gap:8px;flex:none">
+<button type="button" class="btn2 iconm btnd" style="flex:none;min-height:44px;gap:8px" disabled="{{exNone}}" aria-label="{{delAria}}" onClick="{{askDel}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M10 11v6" /><path d="M14 11v6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg><span class="hide-m">Delete</span></button>
+<button type="button" class="btn2 iconm" style="flex:none;min-height:44px;gap:8px" disabled="{{exNone}}" aria-label="{{exAria}}" onClick="{{openExport}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 3v12" /><path d="m17 8-5-5-5 5" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg><span class="hide-m">Export</span></button>
+<span class="fwrap"><button type="button" class="btn2 iconm" aria-haspopup="dialog" aria-label="Filters" style="position:relative;flex:none;min-height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:8px" onClick="{{openFilters}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 6h18" /><path d="M7 12h10" /><path d="M10 18h4" /></svg><span class="hide-m">Filters</span></button><sc-if value="{{filtersOn}}" hint-placeholder-val="{{false}}"><button type="button" class="fclear" aria-label="Clear all filters" title="Clear all filters" onClick="{{clearFilters}}"><span class="fn">{{filterCount}}</span><span class="fx"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></span></button></sc-if></span>
+</span>
+</div>
+
+<sc-if value="{{delAsk}}" hint-placeholder-val="{{false}}">
+<div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:var(--dangerSoft)"><span style="flex:1 1 220px;font-size:14px;font-weight:600;color:var(--danger)">{{delText}}</span><button type="button" class="btn2" style="min-height:44px" onClick="{{cancelDel}}">Cancel</button><button type="button" class="btn2 btnd" style="min-height:44px" onClick="{{doDel}}">Delete</button></div>
+</sc-if>
+
+<sc-if value="{{hasRows}}" hint-placeholder-val="{{true}}"><div style="display:flex;align-items:center;gap:12px;padding:0 4px"><button type="button" class="selbox" role="checkbox" aria-checked="{{allSel}}" aria-label="Select all shown statements" onClick="{{toggleAll}}" style="{{allBox}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{allTick}}"><path d="M20 6 9 17l-5-5" /></svg></button><span style="font-size:13px;font-weight:600;color:var(--muted)">{{selText}}</span></div></sc-if>
+<sc-if value="{{noMatch}}" hint-placeholder-val="{{false}}"><div style="background:var(--surface);border-radius:24px;padding:24px;text-align:center;font-size:14px;color:var(--muted)">No statements match these filters.</div></sc-if>
+
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+<details class="sgroup" open="{{g.openAttr}}">
+<summary><span style="{{g.icon}}"><sc-if value="{{g.isLoan}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg></sc-if><sc-if value="{{g.isAcct}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /><path d="M6 14h2" /></svg></sc-if></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:700">{{g.name}}</span><span style="font-size:12px;color:var(--muted);font-weight:500">{{g.sub}}</span></span><span class="chip hide-m" style="flex:none;{{g.sumChip}}">{{g.summary}}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="archchev" style="flex:none"><path d="m6 9 6 6 6-6" /></svg></summary>
+<div style="display:flex;flex-direction:column;gap:8px;padding-top:12px">
+<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+<div class="srow">
+<sc-if value="{{r.notMissing}}" hint-placeholder-val="{{true}}"><button type="button" class="selbox" role="checkbox" aria-checked="{{r.picked}}" aria-label="Select {{r.title}}" onClick="{{r.togglePick}}" style="{{r.box}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{r.tick}}"><path d="M20 6 9 17l-5-5" /></svg></button></sc-if>
+<sc-if value="{{r.isMissing}}" hint-placeholder-val="{{false}}"><span style="flex:none;width:24px"></span></sc-if>
+<button type="button" class="sopen cardopen" onClick="{{r.open}}" disabled="{{r.isMissing}}"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:700">{{r.title}}</span><span style="font-size:12px;color:var(--muted);font-weight:500">{{r.meta}}</span></span><span class="chip" style="flex:none;{{r.chip}}">{{r.status}}</span><sc-if value="{{r.notMissing}}" hint-placeholder-val="{{true}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="cardarrow" style="flex:none;color:var(--muted)"><path d="m9 18 6-6-6-6" /></svg></sc-if></button>
+<sc-if value="{{r.hasAct}}" hint-placeholder-val="{{false}}"><sc-if value="{{r.isLayout}}" hint-placeholder-val="{{false}}"><a class="btn2" href="Settings.dc.html" onClick="{{r.goLy}}" style="flex:none;min-height:40px;padding:0 14px;font-size:13px">Map layout</a></sc-if><sc-if value="{{r.notLayout}}" hint-placeholder-val="{{true}}"><button type="button" class="btn2" style="flex:none;min-height:40px;padding:0 14px;font-size:13px" onClick="{{r.act}}">{{r.actLabel}}</button></sc-if></sc-if>
+</div>
+</sc-for>
+<sc-if value="{{g.hasMore}}" hint-placeholder-val="{{false}}"><button type="button" class="btn2" style="align-self:flex-start;min-height:40px;padding:0 16px;font-size:13px" onClick="{{g.showMore}}">{{g.moreLabel}}</button></sc-if>
+<sc-if value="{{g.hasLess}}" hint-placeholder-val="{{false}}"><button type="button" class="btn2" style="align-self:flex-start;min-height:40px;padding:0 16px;font-size:13px" onClick="{{g.showLess}}">Show fewer</button></sc-if>
+</div>
+</details>
+</sc-for>
+
+<sc-if value="{{delHas}}" hint-placeholder-val="{{false}}">
+<details class="arch" style="background:var(--surface);border-radius:24px;padding:14px 22px">
+<summary>Deleted Statements <span style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:600">{{delCount}}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="archchev"><path d="m6 9 6 6 6-6" /></svg></span></summary>
+<div style="display:flex;flex-direction:column;gap:8px;padding:6px 0 4px">
+<sc-for list="{{delRows}}" as="a" hint-placeholder-count="1">
+<div class="archrow"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:700">{{a.name}}</span><span style="font-size:12px;color:var(--muted);font-weight:500">{{a.sub}}</span></span><span style="flex:none;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--t2)">Deleted</span><sc-if value="{{a.idle}}" hint-placeholder-val="{{true}}"><button type="button" class="btn2" style="flex:none;min-height:40px;padding:0 14px;font-size:13px" onClick="{{a.ask}}">Restore</button></sc-if></div>
+<sc-if value="{{a.asking}}" hint-placeholder-val="{{false}}"><div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:var(--surface2)"><span style="flex:1 1 200px;font-size:14px;font-weight:600">Restore this statement? Its transactions count again in balances and forecasts.</span><button type="button" class="btn2" style="min-height:44px" onClick="{{a.cancel}}">Cancel</button><button type="button" class="hbp" style="min-height:44px;padding:0 20px;border:0;border-radius:999px;background:var(--primary);color:var(--primaryInk);font-size:14px;font-weight:600;cursor:pointer" onClick="{{a.restore}}">Restore</button></div></sc-if>
+</sc-for>
+</div>
+</details>
+</sc-if>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{showView}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;align-items:flex-start;gap:14px">
+<button class="hbs" type="button" onClick="{{closeView}}" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:0 18px 0 12px;border:0;border-radius:999px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>Statements</button>
+<div style="display:flex;align-items:center;gap:12px;width:100%">
+<span style="{{v.icon}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /><path d="M14 2v5a1 1 0 0 0 1 1h5" /></svg></span>
+<div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+<h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-0.02em">{{v.title}}</h1>
+<div style="font-size:14px;color:var(--muted)"><a class="lnk" href="{{v.srcHref}}">{{v.src}}</a> · {{v.meta}}</div>
+</div>
+<details class="dots"><summary aria-label="Statement actions"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg></summary><div class="dots-menu"><span class="gl">Statement</span><button type="button" onClick="{{v.download}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Download original</button><a href="Settings.dc.html" onClick="{{goLayouts}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M3 9h18" /><path d="M9 21V9" /></svg>Re-import with a different layout</a><span class="gl">Destructive</span><button type="button" class="danger" onClick="{{v.ask}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M10 11v6" /><path d="M14 11v6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>Delete statement</button></div></details>
+</div>
+<span class="chip" style="{{v.chip}}">{{v.status}}</span>
+</div>
+
+<sc-if value="{{v.confirming}}" hint-placeholder-val="{{false}}"><div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:var(--dangerSoft)"><span style="flex:1 1 220px;font-size:14px;font-weight:600;color:var(--danger)">Delete this statement? Its transactions come out of balances and forecasts. You can restore it from Deleted Statements.</span><button type="button" class="btn2" style="min-height:44px" onClick="{{v.cancel}}">Cancel</button><button type="button" class="btn2 btnd" style="min-height:44px" onClick="{{v.confirm}}">Delete</button></div></sc-if>
+
+<sc-if value="{{v.attn}}" hint-placeholder-val="{{false}}"><div role="status" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 16px;border-radius:18px;background:var(--t2)"><span style="flex:1 1 260px;font-size:14px;font-weight:600;line-height:1.5">Interest differs by $0.42 from Folio's daily calculation. Folio uses the statement's figure, so balances stay exact. This is usually rounding or a posting-day difference.</span><sc-if value="{{v.notReviewing}}" hint-placeholder-val="{{true}}"><button type="button" class="btn2" style="min-height:44px;background:var(--surface)" onClick="{{v.startReview}}">Mark as reviewed</button></sc-if><sc-if value="{{v.reviewing}}" hint-placeholder-val="{{false}}"><div style="flex:1 1 100%;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><input class="fin" type="text" placeholder="Note (optional), e.g. Bank confirmed rounding" aria-label="Review note (optional)" value="{{v.revNote}}" onChange="{{v.onRevNote}}" style="flex:1 1 240px;width:auto;background:var(--surface)"><button type="button" class="btn2" style="min-height:44px;background:var(--surface)" onClick="{{v.cancelReview}}">Cancel</button><button type="button" class="hbp" style="min-height:44px;padding:0 20px;border:0;border-radius:999px;background:var(--primary);color:var(--primaryInk);font-size:14px;font-weight:600;cursor:pointer" onClick="{{v.markReviewed}}">Mark as reviewed</button></div></sc-if></div></sc-if>
+<sc-if value="{{v.needsLayout}}" hint-placeholder-val="{{false}}"><div role="status" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 16px;border-radius:18px;background:var(--t2)"><span style="flex:1 1 260px;font-size:14px;font-weight:600;line-height:1.5">This statement's layout isn't mapped yet, so its figures and transactions can't be read. Map it once and future statements will match automatically.</span><a class="btn2" href="Settings.dc.html" onClick="{{goLayouts}}" style="min-height:44px;background:var(--surface)">Map layout</a></div></sc-if>
+
+<section style="background:var(--hero);color:var(--heroInk);border-radius:24px;padding:24px;display:flex;flex-wrap:wrap;gap:20px;align-items:stretch">
+<div style="flex:1 1 240px;display:flex;flex-direction:column;gap:10px;justify-content:center;min-width:0">
+<div style="font-size:14px;color:var(--heroMuted)">{{v.closeLabel}}</div>
+<div style="font-size:32px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">{{v.close}}</div>
+<div style="font-size:14px;color:var(--heroMuted);line-height:1.5">{{v.heroLine}}</div>
+</div>
+<sc-if value="{{v.notLayout}}" hint-placeholder-val="{{true}}">
+<div class="scroll-x" style="flex:1 1 520px;min-width:0;display:flex;gap:12px;padding:2px 0 4px">
+<sc-for list="{{v.cards}}" as="c" hint-placeholder-count="3">
+<div style="flex:1 0 176px;aspect-ratio:1/1;align-self:flex-start;scroll-snap-align:start;border-radius:18px;padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;color:var(--onA);{{c.bg}}">
+<div style="font-size:14px;font-weight:600">{{c.t}}</div>
+<div style="font-size:24px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">{{c.v}}</div>
+<div style="margin-top:auto;font-size:12px;color:var(--onAMuted)">{{c.s}}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</section>
+
+<div role="tablist" aria-label="Statement view" style="display:flex;gap:8px"><sc-for list="{{v.tabs}}" as="t" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{t.sel}}" class="hbt" style="min-height:44px;padding:0 20px;border-radius:999px;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;{{t.style}}" onClick="{{t.pick}}">{{t.t}}</button></sc-for></div>
+<sc-if value="{{v.tabDetails}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:stretch">
+<sc-if value="{{v.notLayout}}" hint-placeholder-val="{{true}}">
+<section class="card">
+<div><h2 class="h2">Checks</h2><div class="sub">Every statement is checked against itself and Folio's own calculation.</div></div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5">
+<sc-for list="{{v.checks}}" as="c" hint-placeholder-count="4"><div style="display:flex;gap:10px;align-items:flex-start"><sc-if value="{{c.good}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:var(--sel);margin-top:1px"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg></sc-if><sc-if value="{{c.bad}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;color:#c27a12;margin-top:1px"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg></sc-if><span>{{c.text}}</span></div></sc-for>
+</div>
+</section>
+</sc-if>
+<section class="card">
+<div><h2 class="h2">Statement Details</h2></div>
+<div class="rowlist" style="display:flex;flex-direction:column;background:var(--surface2);border-radius:18px;padding:4px 16px">
+<sc-for list="{{v.details}}" as="r" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);font-size:14px"><span style="color:var(--muted);font-weight:500">{{r.k}}</span><span style="font-weight:600;text-align:right">{{r.v}}</span></div></sc-for>
+</div>
+</section>
+</div>
+
+<section class="card" style="gap:12px">
+<div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px">
+<div><h2 class="h2">Transactions</h2><div class="sub">{{v.txCount}}</div></div>
+<sc-if value="{{v.notLayout}}" hint-placeholder-val="{{true}}"><div role="group" aria-label="Show" style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{v.txTabs}}" as="o" hint-placeholder-count="4"><button type="button" aria-pressed="{{o.sel}}" class="fchip" style="min-height:40px;padding:0 14px;font-size:13px;{{o.style}}" onClick="{{o.pick}}">{{o.t}}</button></sc-for></div></sc-if>
+</div>
+<div class="rowlist" style="display:flex;flex-direction:column">
+<sc-for list="{{v.txs}}" as="x" hint-placeholder-count="8">
+<button type="button" class="txrow cardopen" onClick="{{x.show}}" aria-label="{{x.desc}} on {{x.date}}, show on the original statement">
+<span style="flex:none;width:52px;font-size:12px;color:var(--muted);font-weight:600">{{x.date}}</span>
+<span style="flex:1;min-width:0;font-size:14px;font-weight:600">{{x.desc}}</span>
+<span style="flex:none;text-align:right;display:flex;flex-direction:column;gap:1px"><span style="font-size:14px;font-variant-numeric:tabular-nums;{{x.tone}}">{{x.amt}}</span><span style="font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums">{{x.bal}}</span></span>
+</button>
+</sc-for>
+</div>
+</section>
+</div>
+</sc-if>
+<sc-if value="{{v.tabOriginal}}" hint-placeholder-val="{{false}}">
+<section class="card fsbox {{v.fsCls}}" style="gap:14px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+<sc-if value="{{v.isPdf}}" hint-placeholder-val="{{true}}">
+<button type="button" class="rbtn" aria-label="Previous page" disabled="{{v.noPrev}}" onClick="{{v.prev}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg></button>
+<span style="font-size:13px;font-weight:600;min-width:84px;text-align:center">{{v.pgLabel}}</span>
+<button type="button" class="rbtn" aria-label="Next page" disabled="{{v.noNext}}" onClick="{{v.next}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg></button>
+<span style="width:8px"></span>
+<button type="button" class="rbtn" aria-label="Zoom out" disabled="{{v.noZOut}}" onClick="{{v.zOut}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /><path d="M8 11h6" /></svg></button>
+<span style="font-size:13px;font-weight:600;min-width:44px;text-align:center">{{v.zoomLabel}}</span>
+<button type="button" class="rbtn" aria-label="Zoom in" disabled="{{v.noZIn}}" onClick="{{v.zIn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg></button>
+</sc-if>
+<button type="button" class="rbtn" aria-label="{{v.fsLabel}}" title="{{v.fsLabel}}" aria-pressed="{{v.fsOn}}" onClick="{{v.fsToggle}}"><sc-if value="{{v.fsOff}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" x2="14" y1="3" y2="10" /><line x1="3" x2="10" y1="21" y2="14" /></svg></sc-if><sc-if value="{{v.fsOn}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" /><line x1="14" x2="21" y1="10" y2="3" /><line x1="3" x2="10" y1="21" y2="14" /></svg></sc-if></button><span style="flex:1"></span>
+<button type="button" class="btn2" style="min-height:44px;gap:8px" onClick="{{v.download}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Download</button>
+</div>
+<sc-if value="{{v.isPdf}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;gap:14px;align-items:flex-start">
+<div class="hide-m" style="flex:none;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{v.thumbs}}" as="p" hint-placeholder-count="3"><button type="button" class="thumb {{p.cls}}" aria-label="{{p.aria}}" onClick="{{p.go}}"><span class="thumbpg"><span></span><span></span><span></span><span></span></span><span style="font-size:12px;font-weight:600">{{p.n}}</span></button></sc-for>
+</div>
+<div class="pdfstage">
+<div class="paper" style="{{v.paperStyle}}">
+<sc-if value="{{v.p1}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;justify-content:space-between;gap:2em;margin-bottom:2.4em"><div><div style="font-size:1.9em;font-weight:700">Statement of Account</div><div style="font-size:1.2em;font-weight:700;margin-top:.2em">{{v.docTitle}}</div></div><div style="text-align:right;font-weight:700;font-size:1.2em">{{v.docLender}}</div></div>
+<div style="display:grid;grid-template-columns:auto auto;gap:.3em 1.4em;justify-content:end;margin-bottom:2.4em"><span>{{v.docAcct}}</span><span></span><span>Statement Start Date</span><span style="text-align:right">{{v.docStart}}</span><span>Statement End Date</span><span style="text-align:right">{{v.docEnd}}</span><span>Page</span><span style="text-align:right">{{v.docPage}}</span></div>
+<div style="font-size:1.25em;font-weight:700;margin-bottom:.8em">Account Summary as at {{v.docEnd}}</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1em;border-top:1px solid #bbb;border-bottom:1px solid #bbb;padding:1em 0;margin-bottom:1.6em"><sc-for list="{{v.docSum}}" as="d" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;gap:.5em"><span style="color:#555">{{d.k}}</span><span style="font-size:1.35em;font-weight:700">{{d.v}}</span></div></sc-for></div>
+<sc-if value="{{v.hasExtra}}" hint-placeholder-val="{{false}}"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1em;margin-bottom:1.6em"><sc-for list="{{v.docExtra}}" as="d" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;gap:.5em"><span style="color:#555">{{d.k}}</span><span style="font-size:1.2em;font-weight:700">{{d.v}}</span></div></sc-for></div></sc-if>
+<div style="color:#555;margin-top:auto;border-top:1px solid #ddd;padding-top:1em">Please check all entries on this statement and tell your lender promptly about any error.</div>
+</sc-if>
+<sc-if value="{{v.pTx}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;justify-content:space-between;margin-bottom:1.4em"><span style="font-size:1.25em;font-weight:700">Transaction Details</span><span>Page {{v.docPage}}</span></div>
+<div class="ptable"><span class="ph">Date</span><span class="ph">Transaction Description</span><span class="ph r">Debit</span><span class="ph r">Credit</span><span class="ph r">Balance</span>
+<sc-for list="{{v.pRows}}" as="x" hint-placeholder-count="12"><span class="pc" style="{{x.st}}">{{x.d}}</span><span class="pc" style="{{x.st}}">{{x.t}}</span><span class="pc r" style="{{x.st}}">{{x.dr}}</span><span class="pc r" style="{{x.st}}">{{x.cr}}</span><span class="pc r" style="{{x.st}}">{{x.b}}</span></sc-for>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{v.isCsv}}" hint-placeholder-val="{{false}}">
+<div class="pdfstage"><div class="csvgrid"><span class="ch">Date</span><span class="ch">Description</span><span class="ch r">Amount</span><span class="ch r">Balance</span><sc-for list="{{v.csvRows}}" as="x" hint-placeholder-count="8"><span class="cc" style="{{x.st}}">{{x.c1}}</span><span class="cc" style="{{x.st}}">{{x.c2}}</span><span class="cc r" style="{{x.st}}">{{x.c3}}</span><span class="cc r" style="{{x.st}}">{{x.c4}}</span></sc-for></div></div>
+</sc-if>
+<div style="font-size:12px;color:var(--muted)">{{v.hlNote}} The original file stays on your server.</div>
+</section>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{toast}}" hint-placeholder-val="{{false}}">
+<div role="status" style="position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:60;max-width:calc(100vw - 32px);box-sizing:border-box;padding:12px 20px;border-radius:999px;background:var(--hero);color:var(--heroInk);font-size:14px;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.28)">{{toast}}</div>
+</sc-if>
+</div>
+
+<footer style="max-width:1100px;margin:32px auto 0;padding-top:16px;border-top:1px solid var(--line);font-size:12px;font-weight:500;color:var(--muted);text-align:center"><a class="footlnk" href="Settings.dc.html" onClick="{{footGo}}" title="Server settings">Folio &copy; v1.0.0</a></footer>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1700}}'>
+class Component extends DCLogic {
+  get SEG_ON() { return "background:var(--primary);color:var(--primaryInk)"; }
+  get SEG_OFF() { return "background:transparent;color:var(--ink)"; }
+  themes() {
+    const keys = ['bg', 'surface', 'surface2', 'ink', 'muted', 'line', 'hero', 'heroInk', 'heroMuted', 'primary', 'primaryInk', 'a1', 'a2', 'a3', 'onA', 'onAMuted', 'sel', 'base', 'hist'];
+    const mk = (a) => { const o = {}; keys.forEach((k, i) => { o[k] = a[i]; }); return o; };
+    return {
+      lilac: { name: 'Lilac',
+        light: mk(['#f1f1f4', '#ffffff', '#f7f7fa', '#1f1c3b', '#6b6985', '#ececf2', '#2b2849', '#ffffff', '#c9c6e6', '#2b2849', '#ffffff', '#b8a5fa', '#fddcb4', '#e8fb4f', '#1f1c3b', '#3b3760', '#7b5cf5', '#a3a1b8', '#2b2849']),
+        dark: mk(['#14122a', '#1f1d3a', '#28254a', '#f1f0fb', '#a9a7c2', '#302d52', '#34306a', '#ffffff', '#cfcbf0', '#b8a5fa', '#1f1c3b', '#b8a5fa', '#fddcb4', '#e8fb4f', '#1f1c3b', '#3b3760', '#b8a5fa', '#6d6a8f', '#f1f0fb']) },
+      ocean: { name: 'Ocean',
+        light: mk(['#eef3f7', '#ffffff', '#f5f8fb', '#12263a', '#5a6b7d', '#e1e9f0', '#12324d', '#ffffff', '#b9cfe3', '#12324d', '#ffffff', '#9fd0f5', '#bfe9e0', '#ffe9a8', '#0f2336', '#2e4a63', '#1f7ae0', '#9aa9b8', '#12324d']),
+        dark: mk(['#0d1a26', '#14273a', '#1b3350', '#e9f2fa', '#9db3c7', '#223b54', '#1d4a73', '#ffffff', '#c3dcf0', '#9fd0f5', '#0f2336', '#9fd0f5', '#bfe9e0', '#ffe9a8', '#0f2336', '#2e4a63', '#6db6ff', '#5d7389', '#e9f2fa']) },
+      forest: { name: 'Forest',
+        light: mk(['#f1f3ee', '#ffffff', '#f6f8f3', '#1d2b22', '#5f6f64', '#e4e9e0', '#23402f', '#ffffff', '#bcd3c3', '#23402f', '#ffffff', '#bfe3b4', '#f3dcb2', '#d8ef9e', '#162419', '#34503f', '#2f8f5b', '#9aab9f', '#23402f']),
+        dark: mk(['#101a14', '#17261c', '#1f3427', '#e8f3ea', '#a1b8a8', '#264232', '#24523a', '#ffffff', '#c4dccb', '#bfe3b4', '#162419', '#bfe3b4', '#f3dcb2', '#d8ef9e', '#162419', '#34503f', '#7fd6a0', '#5f7a69', '#e8f3ea']) },
+      sunset: { name: 'Sunset',
+        light: mk(['#f7f1ee', '#ffffff', '#fbf6f3', '#3a1f1a', '#7a6560', '#f0e4de', '#4a2330', '#ffffff', '#e8c9cc', '#4a2330', '#ffffff', '#ffb8a3', '#ffe0a3', '#f5c6ec', '#3a1f1a', '#5c3a35', '#d9482b', '#b3a19b', '#4a2330']),
+        dark: mk(['#1b1113', '#2a1b1e', '#382529', '#fbeee9', '#c4a9a2', '#4a3236', '#6b2d3e', '#ffffff', '#f0cfd2', '#ffb8a3', '#3a1f1a', '#ffb8a3', '#ffe0a3', '#f5c6ec', '#3a1f1a', '#5c3a35', '#ff8f70', '#8c7570', '#fbeee9']) },
+      graphite: { name: 'Graphite',
+        light: mk(['#f2f2f2', '#ffffff', '#f7f7f7', '#1a1a1a', '#666666', '#e8e8e8', '#222222', '#ffffff', '#bdbdbd', '#222222', '#ffffff', '#d9d9e0', '#e6e0d4', '#cfe0d8', '#1a1a1a', '#3a3a3a', '#4a5fc1', '#aaaaaa', '#222222']),
+        dark: mk(['#121212', '#1c1c1c', '#262626', '#eeeeee', '#a0a0a0', '#2e2e2e', '#2f2f2f', '#ffffff', '#c9c9c9', '#e5e5e5', '#1a1a1a', '#d9d9e0', '#e6e0d4', '#cfe0d8', '#1a1a1a', '#3a3a3a', '#8fa2ff', '#666666', '#eeeeee']) }
+    };
+  }
+  componentDidMount() {
+    try { const raw = window.localStorage.getItem('folioOpen'); if (raw) { const o = JSON.parse(raw); window.localStorage.removeItem('folioOpen'); if (o && o.kind === 'statement' && Date.now() - o.t < 60000) { const p = String(o.end).split(' '); const mi = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(String(p[1]).slice(0, 3)); const key = o.src + ':' + new Date(Number(p[2]), mi, Number(p[0])).getTime(); this.setState({ viewKey: key, vTab: 'details', pg: 1, hl: null }); } } } catch (e) {}
+    const load = () => {
+      try {
+        const raw = window.localStorage.getItem('loanLookTheme');
+        if (raw) {
+          const v = JSON.parse(raw);
+          if (v && v.themeId && v.mode) this.setState({ themeId: v.themeId, mode: v.mode });
+        }
+      } catch (e) {}
+    };
+    load();
+    this._onStorage = () => load();
+    try { window.addEventListener('storage', this._onStorage); } catch (e) {}
+    this._onScroll = () => {
+      const s = (window.scrollY || document.documentElement.scrollTop || 0) > 4;
+      if (s !== this._scrolled) { this._scrolled = s; this.setState({ scrolled: s }); }
+    };
+    try { window.addEventListener('scroll', this._onScroll, { passive: true }); } catch (e) {}
+  }
+  componentWillUnmount() {
+    try { window.removeEventListener('storage', this._onStorage); } catch (e) {}
+    try { window.removeEventListener('scroll', this._onScroll); } catch (e) {}
+  }
+  saveTheme(themeId, mode) {
+    this.setState({ themeId, mode });
+    try { window.localStorage.setItem('loanLookTheme', JSON.stringify({ themeId, mode })); } catch (e) {}
+  }
+
+
+  notifRead() { try { return JSON.parse(window.localStorage.getItem('loanNotifRead') || '[]'); } catch (e) { return []; } }
+  notifMark(ids) { try { const r = this.notifRead(); ids.forEach((i) => { if (r.indexOf(i) < 0) r.push(i); }); window.localStorage.setItem('loanNotifRead', JSON.stringify(r)); } catch (e) {} this.setState({ notifTick: Date.now() }); }
+  notifVals() {
+    const st = this.state || {};
+    const read = this.notifRead();
+    const warn = 'background:var(--dangerSoft);color:var(--danger)';
+    const info = 'background:var(--surface2);color:var(--ink)';
+    const base = [
+      { id: 'rate-review', title: 'Rate review due', tag: 'Overdue', tagStyle: warn, text: 'Jamie Taylor was last asked six months ago. Ask for a better rate on the home loan.', when: 'Today', href: 'Settings.dc.html', fo: { kind: 'broker', id: 'tf' } },
+      { id: 'stmt-missing', title: 'Statement not imported', tag: 'Action', tagStyle: warn, text: 'The ' + (() => { const x = new Date(); x.setDate(0); return x.toLocaleDateString('en-AU', { month: 'long' }); })() + ' statement for the Bills Account has not been imported yet.', when: '2 days ago', href: 'Statements.dc.html' },
+      { id: 'rate-change', title: 'Rate change to confirm', tag: 'Review', tagStyle: info, text: 'The last statement shows 6.16%, down from 6.34%. Confirm it so forecasts stay accurate.', when: '8 Oct', href: 'Main.dc.html#details' },
+      { id: 'remap', title: 'Layout needs re-mapping', tag: 'Review', tagStyle: info, text: 'The Everyday account statement from Example Bank no longer matches its saved layout.', when: '5 Oct', href: 'Settings.dc.html', fo: { kind: 'layout', id: 'L2' } }
+    ];
+    const notifs = base.map((n) => { const unread = read.indexOf(n.id) < 0; return Object.assign({}, n, { dot: unread ? 'background:var(--primary)' : 'background:transparent', open: () => { if (n.fo) { try { window.localStorage.setItem('folioOpen', JSON.stringify(Object.assign({ t: Date.now() }, n.fo))); } catch (e) {} } this.notifMark([n.id]); } }); });
+    const unreadCount = notifs.filter((n) => read.indexOf(n.id) < 0).length;
+    return {
+      notifs, unreadCount, hasUnread: unreadCount > 0, allRead: unreadCount === 0,
+      notifsOpen: !!st.notifsOpen, toggleNotifs: () => this.setState({ notifsOpen: !st.notifsOpen }),
+      markAll: () => this.notifMark(base.map((n) => n.id))
+    };
+  }
+  hhSaved() { try { const v = window.localStorage.getItem('loanHousehold'); if (v) return v; } catch (e) {} return 'Sample household'; }
+  baseVals() {
+    const st = this.state || {};
+    const themeId = st.themeId || 'lilac';
+    const mode = st.mode || 'light';
+    const all = this.themes();
+    const th = all[themeId][mode];
+    const themeVars = Object.keys(th).map((k) => '--' + k + ':' + th[k]).join(';') +
+      ';--t1:color-mix(in srgb,var(--a1) 26%,var(--surface))' +
+      ';--t2:color-mix(in srgb,var(--a2) 26%,var(--surface))' +
+      ';--t3:color-mix(in srgb,var(--a3) 26%,var(--surface))' +
+      ';--outline:color-mix(in srgb,var(--ink) 20%,transparent)' +
+      ';--trackA:color-mix(in srgb,var(--onA) 18%,transparent)' +
+      ';--navOn:color-mix(in srgb,var(--a1) 30%,var(--surface))' +
+      ';--selSoft:color-mix(in srgb,var(--sel) 16%,transparent)' +
+      ';--add:var(--a3);--addInk:var(--hero)' +
+      ';--danger:' + (mode === 'dark' ? '#ff8f8f' : '#c9352f') +
+      ';--dangerSoft:color-mix(in srgb,var(--danger) 14%,transparent)' +
+      ';color-scheme:' + mode;
+    const themeList = Object.keys(all).map((id) => {
+      const c = all[id][mode];
+      const on = id === themeId;
+      return {
+        name: all[id].name, c1: c.a1, c2: c.a2, c3: c.a3, c4: c.hero, on,
+        box: on ? 'border:2px solid var(--sel);background:var(--surface2)' : 'border:2px solid transparent;background:var(--surface2)',
+        pick: () => this.saveTheme(id, mode)
+      };
+    });
+    return {
+      goLayouts: () => { try { window.localStorage.setItem('folioOpen', JSON.stringify({ kind: 'settings', tab: 'layouts', t: Date.now() })); } catch (e) {} }, goLenders: () => { try { window.localStorage.setItem('folioOpen', JSON.stringify({ kind: 'settings', tab: 'lenders', t: Date.now() })); } catch (e) {} }, goBrokers: () => { try { window.localStorage.setItem('folioOpen', JSON.stringify({ kind: 'settings', tab: 'brokers', t: Date.now() })); } catch (e) {} }, footGo: () => { try { window.localStorage.setItem('folioOpen', JSON.stringify({ kind: 'settings', tab: 'server', t: Date.now() })); } catch (e) {} }, themeVars, themeList, hhLabel: this.hhSaved(), ...this.notifVals(),
+      topStyle: '',
+      panel: !!st.panel, togglePanel: () => this.setState({ panel: !st.panel }),
+      isLight: mode === 'light', isDark: mode === 'dark',
+      lightStyle: mode === 'light' ? this.SEG_ON : this.SEG_OFF, darkStyle: mode === 'dark' ? this.SEG_ON : this.SEG_OFF,
+      setLight: () => this.saveTheme(themeId, 'light'), setDark: () => this.saveTheme(themeId, 'dark'),
+      toast: st.toast || ''
+    };
+  }
+  flash(msg) {
+    this.setState({ toast: msg });
+    try { clearTimeout(this._tt); } catch (e) {}
+    this._tt = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+  seg(on) { return on ? 'background:var(--primary);color:var(--primaryInk)' : 'background:transparent;color:var(--ink)'; }
+  pill(on) { return on ? 'border:0;background:var(--primary);color:var(--primaryInk)' : 'border:1px solid var(--outline);background:var(--surface);color:var(--ink)'; }
+  choice(on) { return on ? 'border:2px solid var(--sel);background:var(--surface2)' : 'border:2px solid transparent;background:var(--surface2)'; }
+
+  layouts() {
+    // Mirrors the saved layouts. Each version reads statements from its date on, until the next version.
+    return [
+      { id: 'L1', name: 'Home loan statement', lender: 'Example Bank', kind: 'loan', fmt: 'PDF', v: [new Date(2023, 0, 12), new Date(2026, 2, 14)] },
+      { id: 'L2', name: 'Everyday account statement', lender: 'Example Bank', kind: 'account', fmt: 'PDF', v: [new Date(2024, 1, 20)] },
+      { id: 'L5', name: 'Credit card statement', lender: 'Example Bank', kind: 'card', fmt: 'PDF', v: [new Date(2026, 9, 2)] },
+      { id: 'L3', name: 'Account export', lender: 'Sample Credit Union', kind: 'account', fmt: 'CSV', v: [new Date(2025, 3, 5)] },
+      { id: 'L4', name: 'Loan statement', lender: 'Sample Credit Union', kind: 'loan', fmt: 'PDF', v: [new Date(2024, 8, 18)] }
+    ];
+  }
+  sources() {
+    // f: months between statements, a: a month the period ends in (0 = Jan), d: end day (0 = last day of month), n: how many to show
+    return [
+      { id: 'h1', name: 'Sample Home Loan · Split 01', short: 'Split 01', parent: 'Sample Home Loan', kind: 'loan', lender: 'Example Bank', f: 6, a: 7, d: 11, n: 6, fmt: 'PDF', pages: 3, slot: 'a1', open: 250486.22 },
+      { id: 'h2', name: 'Sample Home Loan · Split 02', short: 'Split 02', parent: 'Sample Home Loan', kind: 'loan', lender: 'Example Bank', f: 6, a: 7, d: 11, n: 6, fmt: 'PDF', pages: 2, slot: 'a1', open: 49010 },
+      { id: 'inv', name: 'Investment Property', parent: 'Investment Property', kind: 'loan', lender: 'Example Bank', f: 6, a: 4, d: 10, n: 5, fmt: 'PDF', pages: 2, slot: 'a2', open: 320600 },
+      { id: 'car', name: 'Car loan', parent: 'Car loan', kind: 'loan', lender: 'Sample Credit Union', f: 6, a: 2, d: 10, n: 4, fmt: 'PDF', pages: 2, slot: 'a3', open: 21900 },
+      { id: 'every', name: 'Everyday Account', parent: 'Everyday Account', kind: 'account', lender: 'Example Bank', f: 1, a: 0, d: 0, n: 12, fmt: 'CSV', pages: 1, slot: 'a1', open: 80100 },
+      { id: 'bills', name: 'Bills Account', parent: 'Bills Account', kind: 'account', lender: 'Example Bank', f: 1, a: 0, d: 0, n: 12, fmt: 'PDF', pages: 2, slot: 'a2', open: 3020 },
+      { id: 'rental', name: 'Rental Offset', parent: 'Rental Offset', kind: 'account', lender: 'Example Bank', f: 1, a: 0, d: 0, n: 12, fmt: 'PDF', pages: 2, slot: 'a1', open: 21100 },
+      { id: 'holiday', name: 'Holiday Savings', parent: 'Holiday Savings', kind: 'account', lender: 'Sample Credit Union', f: 3, a: 2, d: 0, n: 6, fmt: 'CSV', pages: 1, slot: 'a3', open: 12100 }
+    ];
+  }
+  sampleTx() {
+    // Shape of a real six-monthly home loan statement (12 Feb to 11 Aug 2026), with names and numbers removed.
+    return { end: [2026, 7, 11], open: 250486.22, rate0: 5.41, rows: [
+      ['2026-02-12', 'Repayment', 0, 384], ['2026-02-17', 'Interest rate change to 5.66% p.a.', 0, 0, 5.66], ['2026-02-19', 'Repayment', 0, 384], ['2026-02-26', 'Repayment', 0, 384], ['2026-03-05', 'Repayment', 0, 384],
+      ['2026-03-10', 'Interest', 1073.38, 0], ['2026-03-12', 'Repayment', 0, 384], ['2026-03-19', 'Repayment', 0, 384], ['2026-03-26', 'Repayment', 0, 384], ['2026-03-31', 'Interest rate change to 5.91% p.a.', 0, 0, 5.91],
+      ['2026-04-02', 'Repayment', 0, 384], ['2026-04-09', 'Repayment', 0, 384], ['2026-04-10', 'Interest', 1215.85, 0], ['2026-04-16', 'Repayment', 0, 394], ['2026-04-23', 'Repayment', 0, 394], ['2026-04-30', 'Repayment', 0, 394],
+      ['2026-05-07', 'Repayment', 0, 394], ['2026-05-10', 'Interest', 1207.38, 0], ['2026-05-14', 'Repayment', 0, 404], ['2026-05-15', 'Interest rate change to 6.16% p.a.', 0, 0, 6.16], ['2026-05-21', 'Repayment', 0, 404], ['2026-05-28', 'Repayment', 0, 404],
+      ['2026-06-04', 'Repayment', 0, 404], ['2026-06-10', 'Interest', 1290.87, 0], ['2026-06-11', 'Repayment', 0, 404], ['2026-06-18', 'Repayment', 0, 404], ['2026-06-25', 'Repayment', 0, 404], ['2026-07-02', 'Repayment', 0, 404],
+      ['2026-07-09', 'Repayment', 0, 404], ['2026-07-10', 'Interest', 1253.34, 0], ['2026-07-16', 'Repayment', 0, 413], ['2026-07-23', 'Repayment', 0, 413], ['2026-07-30', 'Repayment', 0, 413], ['2026-08-06', 'Repayment', 0, 413], ['2026-08-10', 'Interest', 1292.42, 0]
+    ], inAdvance: 4840, termLeft: '25 years', forecastTerm: '20 years 1 month', repay: '$413 weekly, every Thursday' };
+  }
+  renderVals() {
+    const st = this.state || {};
+    const empty = !!(this.props && (this.props.empty === true || this.props.empty === 'true'));
+    const now = new Date(); const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const DAY = 86400000;
+    const m2 = (n) => Math.round(n * 100) / 100;
+    const money2 = (n) => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const money = (n) => '$' + Math.round(n).toLocaleString('en-AU');
+    const dShort = (dt) => dt.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+    const dLong = (dt) => dt.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+    const range = (a, b) => (a.getFullYear() === b.getFullYear() ? dShort(a) : dLong(a)) + ' to ' + dLong(b);
+    const dDue = (dt) => dt.getFullYear() === today0.getFullYear() ? dShort(dt) : dLong(dt);
+    const monthName = (dt) => dt.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+    const plural = (n, w, p) => n + ' ' + (n === 1 ? w : (p || w + 's'));
+    const endOn = (y, m, d) => d === 0 ? new Date(y, m + 1, 0) : new Date(y, m, d);
+    const srcs = this.sources();
+    // ----- periods for each source, newest first
+    const periods = (s) => {
+      const out = []; let y = today0.getFullYear(), m = today0.getMonth();
+      for (let k = 0; k < 40 && out.length < s.n + 1; k++) {
+        if (((m - s.a) % s.f + s.f) % s.f === 0) { const e = endOn(y, m, s.d); if (e <= today0) out.push(e); }
+        m--; if (m < 0) { m = 11; y--; }
+      }
+      return out.slice(0, s.n + 1).map((e, i, arr) => { const prev = arr[i + 1] || endOn(e.getFullYear(), e.getMonth() - s.f, s.d); const start = new Date(prev.getTime() + DAY); return { start, end: e }; }).slice(0, s.n);
+    };
+    const nextDue = (s) => { const p = periods(s)[0]; const e = endOn(p.end.getFullYear(), p.end.getMonth() + s.f, s.d); return new Date(e.getTime() + 3 * DAY); };
+    // ----- statements (calculated) with a few known issues
+    const deleted = st.deleted || {};
+    const reviewed = st.reviewed || {};
+    const imported = st.stage === 'done';
+    const all = [];
+    srcs.forEach((s) => periods(s).forEach((p, i) => {
+      const key = s.id + ':' + p.end.getTime();
+      let status = s.kind === 'loan' ? 'Reconciled' : 'Imported';
+      let note = '';
+      if (s.id === 'h1' && i === 1 && !reviewed[key]) { status = 'Needs attention'; note = 'Interest differs by $0.42'; }
+      if (s.id === 'rental' && i === 0) { status = 'Needs layout'; note = 'New layout from Example Bank'; }
+      const arrived = today0.getTime() - p.end.getTime() > 7 * DAY;
+      if (s.id === 'bills' && i === 0 && !imported) { status = arrived ? 'Missing' : 'Expected'; }
+      all.push({ key, s, i, start: p.start, end: p.end, status, note, year: p.end.getFullYear(), missing: status === 'Missing' || status === 'Expected' });
+    }));
+    const h1 = srcs.find((x) => x.id === 'h1');
+    const oldEnd = new Date(2023, 7, 11), oldStart = new Date(2023, 1, 12);
+    if (imported && !st.skip2 && st.ly2Ok !== false) all.push({ key: 'h1:old', s: h1, i: 99, start: oldStart, end: oldEnd, status: 'Reconciled', note: '', year: 2023, missing: false });
+    const stmts = empty ? [] : all.filter((r) => !deleted[r.key]);
+    const real = stmts.filter((r) => !r.missing);
+    const attention = stmts.filter((r) => r.status === 'Needs attention' || r.status === 'Needs layout').length;
+    const missingN = stmts.filter((r) => r.status === 'Missing').length;
+    // ----- filters
+    const fShow = st.fShow || 'all', fStatus = st.fStatus || 'all', fSrc = st.fSrc || 'all', fYear = st.fYear || 'all', sort = st.sort || 'new';
+    const shown = stmts.filter((r) => (fShow === 'all' || r.s.kind === fShow) && (fStatus === 'all' || r.status === fStatus || (fStatus === 'Missing' && r.missing)) && (fSrc === 'all' || r.s.id === fSrc) && (fYear === 'all' || String(r.year) === fYear));
+    const nF = (fShow !== 'all') + (fStatus !== 'all') + (fSrc !== 'all') + (fYear !== 'all');
+    const chipSt = (on) => on ? 'border:0;background:var(--primary);color:var(--primaryInk)' : 'border:1px solid var(--outline);background:var(--surface);color:var(--ink)';
+    const grp = (title, cur, key, opts) => ({ title, opts: opts.map((o) => ({ t: o[1], sel: o[0] === cur, style: chipSt(o[0] === cur), pick: () => this.setState({ [key]: o[0] }) })) });
+    const years = Array.from(new Set(stmts.map((r) => String(r.year)))).sort().reverse();
+    // ----- selection
+    const picks = st.picks || {};
+    const nSel = Object.keys(picks).filter((k) => stmts.some((r) => r.key === k && !r.missing)).length;
+    const tOn = { box: 'border:0;background:var(--sel);color:var(--surface)', tick: 'display:block' }, tOff = { box: 'border:2px solid var(--outline);background:transparent;color:var(--surface)', tick: 'display:none' };
+    const chipOf = (status) => status === 'Reconciled' || status === 'Imported' ? 'background:var(--t3)' : status === 'Missing' ? 'background:var(--dangerSoft);color:var(--danger)' : status === 'Expected' ? 'background:var(--surface2)' : 'background:var(--t2)';
+    const openStmt = (r) => () => { try { window.scrollTo(0, 0); } catch (e) {} this.setState({ viewKey: r.key, vAsk: null, txF: 'all', vTab: 'details', pg: 1, hl: null }); };
+    const rowOf = (r) => ({
+      key: r.key, picked: !!picks[r.key], box: (picks[r.key] ? tOn : tOff).box, tick: (picks[r.key] ? tOn : tOff).tick,
+      togglePick: () => { const p = Object.assign({}, picks); if (p[r.key]) delete p[r.key]; else p[r.key] = true; this.setState({ picks: p }); },
+      title: r.missing ? monthName(r.end) + ' statement' : range(r.start, r.end),
+      meta: r.missing ? (r.status === 'Missing' ? 'Not imported yet. It was due about ' + dShort(new Date(r.end.getTime() + 3 * DAY)) + '.' : 'Due about ' + dShort(new Date(r.end.getTime() + 3 * DAY))) : r.s.fmt + ' · ' + plural(r.s.pages, 'page') + (r.note ? ' · ' + r.note : ''),
+      status: r.status, chip: chipOf(r.status), isMissing: r.missing, notMissing: !r.missing,
+      goLy: () => { try { window.localStorage.setItem('folioOpen', JSON.stringify({ kind: 'layout', id: 'L2', t: Date.now() })); } catch (e) {} },
+      hasAct: r.status === 'Needs layout' || r.status === 'Missing',
+      actLabel: r.status === 'Needs attention' ? 'Review' : r.status === 'Needs layout' ? 'Map layout' : 'Import',
+      act: r.status === 'Needs attention' ? openStmt(r) : r.status === 'Needs layout' ? () => {} : () => this.setState({ stage: 'review', dest: r.s.id, link: null, who: {}, rateOk: true, skip: false }),
+      isLayout: r.status === 'Needs layout', notLayout: r.status !== 'Needs layout',
+      open: r.missing ? () => {} : openStmt(r)
+    });
+    const ordered = shown.slice().sort((x, y) => sort === 'old' ? x.end - y.end : y.end - x.end);
+    const groups = srcs.map((s) => {
+      const rs = ordered.filter((r) => r.s.id === s.id);
+      if (!rs.length) return null;
+      const mine = stmts.filter((r) => r.s.id === s.id);
+      const last = mine.filter((r) => !r.missing).sort((x, y) => y.end - x.end)[0];
+      const issues = mine.filter((r) => r.status !== 'Reconciled' && r.status !== 'Imported' && r.status !== 'Expected');
+      const summary = issues.length ? (issues.some((r) => r.status === 'Missing') ? '1 missing' : plural(issues.length, 'needs attention', 'need attention')) : 'Up to date';
+      const per = st.perGroup || '5'; const more = st.more || {}; const lim = per === 'all' || more[s.id] ? rs.length : Number(per);
+      return { hasMore: rs.length > lim, moreLabel: 'Show ' + (rs.length - lim) + ' older', showMore: () => this.setState({ more: Object.assign({}, more, { [s.id]: true }) }), hasLess: !!more[s.id] && per !== 'all' && rs.length > Number(per), showLess: () => this.setState({ more: Object.assign({}, more, { [s.id]: false }) }), name: s.name, icon: 'flex:none;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--onA);background:var(--' + s.slot + ')', isLoan: s.kind === 'loan', isAcct: s.kind !== 'loan',
+        sub: plural(mine.filter((r) => !r.missing).length, 'statement') + ' · ' + (last ? 'last ' + dLong(last.end) : 'none yet') + ' · next due about ' + dDue(nextDue(s)), issueN: issues.length, summary, sumChip: issues.length ? chipOf(issues[0].status) : 'background:var(--t3)',
+        openAttr: issues.length > 0 || fSrc !== 'all' || nF > 0, rows: rs.slice(0, lim).map(rowOf) };
+    }).filter(Boolean).map((g, i) => Object.assign(g, { ord: i })).sort((a, b) => (b.issueN > 0) - (a.issueN > 0) || a.ord - b.ord);
+    // ----- import review (calculated)
+    const stage = st.stage || 'idle';
+    const destId = st.dest || 'bills';
+    const dest = srcs.find((s) => s.id === destId) || srcs[5];
+    const target = all.find((r) => r.s.id === 'bills' && r.i === 0);
+    const link = st.link || null;
+    const who = st.who || {};
+    const ppl = [['alex', 'Alex (you)', 'AL', 'a1'], ['sam', 'Sam', 'SA', 'a2'], ['jordan', 'Jordan', 'JO', 'a3']];
+    const people = ppl.map((p) => { const on = !!who[p[0]]; return { name: p[1], ini: p[2], av: 'flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--onA);background:var(--' + p[3] + ')', on, cls: on ? 'on' : '', box: on ? 'background:var(--sel);border:0;color:var(--surface)' : 'border:2px solid var(--outline);background:var(--surface)', tickStyle: on ? '' : 'opacity:0', toggle: () => this.setState({ who: Object.assign({}, who, { [p[0]]: !on }) }) }; });
+    const pickedAny = people.some((p) => p.on);
+    const linkReady = link === 'yes' || (link === 'no' && pickedAny);
+    const nTx = 16, nDup = 2;
+    const tOpen = 3150 - 120, tIn = 2400, tOut = 2270;
+    const checks1 = [
+      { ok: true, text: 'Opening ' + money2(tOpen) + ' + money in ' + money2(tIn) + ' − money out ' + money2(tOut) + ' = closing ' + money2(tOpen + tIn - tOut) },
+      { ok: true, text: 'Running balance agrees on all ' + nTx + ' rows across ' + plural(dest.pages, 'page') },
+      { ok: true, text: plural(nDup, 'transaction was', 'transactions were') + ' already imported and will be skipped' }
+    ];
+    // ----- layout matching: every version of every layout is tried; a version reads statements from its date until the next version
+    const LYS = this.layouts();
+    const lyOf = (src, end) => { const L = LYS.find((x) => x.lender === src.lender && x.kind === src.kind); if (!L) return null; let n = 1; L.v.forEach((d, k) => { if (end >= d) n = k + 1; }); return { L, n }; };
+    const monY = (dt) => dt.toLocaleDateString('en-AU', { month: 'short', year: 'numeric' });
+    const verRange = (L, n) => { const from = L.v[n - 1], to = L.v[n]; const ends = all.filter((r) => !r.missing && r.status !== 'Needs layout' && lyOf(r.s, r.end) && lyOf(r.s, r.end).L.id === L.id && lyOf(r.s, r.end).n === n).map((r) => r.end).sort((a, b) => a - b);
+      return ends.length ? 'statements ' + monY(ends[0]) + (ends.length > 1 ? ' to ' + monY(ends[ends.length - 1]) : '') : 'no statements yet'; };
+    const fileVals = (fk, src, end) => {
+      const auto = lyOf(src, end); const cur = st['ly' + fk] || (auto.L.id + ':' + auto.n); const [cid, cn] = cur.split(':'); const C = LYS.find((x) => x.id === cid); const n = Number(cn);
+      const ok = C.id === auto.L.id && n === auto.n; const chosen = !!st['ly' + fk] && ok === false;
+      return { auto, C, n, ok, label: C.name + ' · version ' + n, autoShort: 'version ' + auto.n + (C.id === auto.L.id ? '' : ' of ' + auto.L.name),
+        meta: ok ? (st['ly' + fk] ? 'Chosen by you · ' : 'Matched automatically · ') + verRange(C, n) : 'Chosen by you · does not fit this file',
+        opts: LYS.filter((x) => x.lender === src.lender).reduce((acc, L) => acc.concat(L.v.map((d, k) => k + 1).reverse().map((vn) => ({ t: L.name + ' · version ' + vn + (vn === L.v.length && L.v.length > 1 ? ' (current)' : ''), d: L.fmt + ' · ' + verRange(L, vn),
+          auto: L.id === auto.L.id && vn === auto.n, sel: L.id === C.id && vn === n, cls: L.id === C.id && vn === n ? 'on' : '', pick: () => this.setState({ ['ly' + fk]: L.id + ':' + vn, lyFor: null }) }))), []) };
+    };
+    const F1 = fileVals('1', dest, target.end);
+    const oldSrc = srcs.find((x) => x.id === 'h1');
+    const F2 = fileVals('2', oldSrc, new Date(2023, 7, 11));
+    const skip2 = !!st.skip2;
+    const badChecks = (F) => [{ ok: false, text: 'Opening balance not found where ' + F.C.name + ' version ' + F.n + ' expects it' }, { ok: false, text: 'Running balance could not be checked, so nothing can be imported from this file with this layout' }];
+    const oOpen = 262940.15, oInt = 7612.4, oRep = 9984;
+    const checks2 = F2.ok ? [
+      { ok: true, text: 'Opening ' + money2(oOpen) + ' + interest ' + money2(oInt) + ' − repayments ' + money2(oRep) + ' = closing ' + money2(m2(oOpen + oInt - oRep)) },
+      { ok: true, text: 'Running balance agrees on all 31 rows across ' + plural(3, 'page') },
+      { ok: true, text: 'Older than your other statements for this split. It is added to the history; forecasts are not changed' }
+    ] : badChecks(F2);
+    const nReady = (F1.ok ? 1 : 0) + (!skip2 && F2.ok ? 1 : 0);
+    const blockers = (!F1.ok) || (!skip2 && !F2.ok);
+    const lyFor = st.lyFor || null; const FL = lyFor === '1' ? F1 : lyFor === '2' ? F2 : null;
+    const fileOut = (F, fk) => ({ chip: F.ok ? 'background:var(--t3)' : 'background:var(--t2)', chipText: F.ok ? 'Layout matched' : 'Layout does not fit', lyName: F.label, lyMeta: F.meta, lyOff: !F.ok,
+      lyOffText: 'This file matched ' + F.auto.L.name + ', version ' + F.auto.n + '. The layout you chose finds nothing where it expects the figures.', autoShort: F.autoShort,
+      lyReset: () => this.setState({ ['ly' + fk]: null }), openLy: () => this.setState({ lyFor: fk }) });
+    const destOpts = srcs.map((s) => ({ t: s.name, d: (s.kind === 'loan' ? 'Loan split · ' : 'Account · ') + s.lender, sel: s.id === destId, cls: s.id === destId ? 'on' : '', icon: 'flex:none;width:36px;height:36px;border-radius:10px;background:var(--' + s.slot + ')', pick: () => this.setState({ dest: s.id, destPick: false }) }));
+    // ----- statement viewer
+    const viewR = !empty && st.viewKey ? stmts.find((r) => r.key === st.viewKey && !r.missing) : null;
+    let v = {};
+    if (viewR) {
+      const s = viewR.s; const T = this.sampleTx();
+      let rows = [];
+      if (s.id === 'h1' && viewR.i === 0) {
+        const shiftM = (viewR.end.getFullYear() - T.end[0]) * 12 + (viewR.end.getMonth() - T.end[1]);
+        let bal = T.open;
+        rows = T.rows.map((x) => { const p = x[0].split('-').map(Number); const dt = new Date(p[0], p[1] - 1 + shiftM, p[2]); bal = m2(bal + x[2] - x[3]); return { dt, desc: x[1], debit: x[2], credit: x[3], bal, rate: x[4] || null }; });
+        v.open = T.open;
+      } else if (s.kind === 'loan') {
+        let bal = s.open * (1 - 0.006 * viewR.i); const rate = s.id === 'h1' ? 5.66 : s.id === 'h2' ? 5.19 : s.id === 'inv' ? 5.89 : 7.10; const rep = s.id === 'h1' ? 384 : s.id === 'h2' ? 120 : s.id === 'inv' ? 470 : 160;
+        v.open = m2(bal); let acc = 0;
+        for (let t = viewR.start.getTime(); t <= viewR.end.getTime(); t += DAY) {
+          const dt = new Date(t); acc += bal * rate / 100 / 365;
+          if (dt.getDay() === 4) { bal = m2(bal - rep); rows.push({ dt, desc: 'Repayment', debit: 0, credit: rep, bal }); }
+          if (dt.getDate() === 10) { const i2 = m2(acc); acc = 0; bal = m2(bal + i2); rows.push({ dt, desc: 'Interest', debit: i2, credit: 0, bal }); }
+        }
+      } else {
+        let bal = s.open; v.open = bal;
+        const pay = s.id === 'every' ? 2600 : s.id === 'bills' ? 600 : s.id === 'rental' ? 2600 : 400;
+        for (let t = viewR.start.getTime(); t <= viewR.end.getTime(); t += DAY) {
+          const dt = new Date(t);
+          if ((s.id === 'every' || s.id === 'bills') && dt.getDay() === 3 && Math.floor(t / DAY / 7) % 2 === 0) { bal = m2(bal + pay); rows.push({ dt, desc: s.id === 'every' ? 'Pay' : 'Transfer in', debit: 0, credit: pay, bal }); }
+          if (s.id === 'every' && dt.getDay() === 4) { bal = m2(bal - 413); rows.push({ dt, desc: 'Transfer to home loan', debit: 413, credit: 0, bal }); }
+          if (s.id === 'every' && dt.getDay() === 6) { const sp = m2(180 + (dt.getDate() * 37) % 160); bal = m2(bal - sp); rows.push({ dt, desc: 'Groceries', debit: sp, credit: 0, bal }); }
+          if (s.id === 'bills' && dt.getDate() === 19) { bal = m2(bal - 184.2); rows.push({ dt, desc: 'Energy provider', debit: 184.2, credit: 0, bal }); }
+          if (s.id === 'rental' && dt.getDate() === 16) { bal = m2(bal + pay); rows.push({ dt, desc: 'Rent received', debit: 0, credit: pay, bal }); }
+          if (s.id === 'holiday' && dt.getDate() === 12) { bal = m2(bal + pay); rows.push({ dt, desc: 'Transfer in', debit: 0, credit: pay, bal }); }
+        }
+      }
+      const interest = m2(rows.filter((x) => x.desc === 'Interest').reduce((a, x) => a + x.debit, 0));
+      const debits = m2(rows.reduce((a, x) => a + x.debit, 0)), credits = m2(rows.reduce((a, x) => a + x.credit, 0));
+      const close = m2(v.open + debits - credits);
+      const rateRows = rows.filter((x) => x.rate);
+      const isLoan = s.kind === 'loan';
+      const needsLayout = viewR.status === 'Needs layout';
+      const attn = viewR.status === 'Needs attention';
+      const txF = st.txF || 'all';
+      rows.forEach((x, n) => { x.n = n; });
+      const txShown = needsLayout ? [] : rows.filter((x) => txF === 'all' || (txF === 'int' && x.desc === 'Interest') || (txF === 'rep' && (x.desc === 'Repayment' || x.credit > 0)) || (txF === 'rate' && x.rate) || (txF === 'out' && x.debit > 0));
+      const lastRate = rateRows.length ? rateRows[rateRows.length - 1].rate : (s.id === 'h2' ? 5.19 : s.id === 'inv' ? 5.89 : s.id === 'car' ? 7.10 : null);
+
+      const vTab = st.vTab || 'details'; const isCsv = s.fmt === 'CSV';
+      const nPages = isCsv ? 1 : 1 + Math.max(1, Math.ceil(rows.length / 30));
+      const pg = Math.min(Math.max(1, st.pg || 1), nPages);
+      const ZS = [0.75, 1, 1.25, 1.5]; const zi = st.zi == null ? 1 : st.zi;
+      const hl = st.hl == null ? -1 : st.hl;
+      const num2 = (n) => n ? Math.abs(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+      const dNum = (dt) => dt.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ');
+      const pRows = [];
+      if (!isCsv && pg >= 2) {
+        const from = (pg - 2) * 30, to = Math.min(rows.length, from + 30);
+        pRows.push({ d: dNum(viewR.start), t: pg === 2 ? 'Opening Balance' : 'Balance brought forward', dr: '', cr: '', b: num2(pg === 2 ? v.open : rows[from - 1].bal), st: 'font-weight:700' });
+        for (let k = from; k < to; k++) { const x = rows[k]; pRows.push({ d: dNum(x.dt), t: x.rate ? x.desc.toUpperCase() : (x.desc === 'Repayment' ? 'REPAYMT A/C TFR' : x.desc.toUpperCase()), dr: num2(x.debit), cr: num2(x.credit), b: x.rate ? '' : num2(x.bal), st: k === hl ? 'background:#fff1a6;outline:2px solid #e3b600' : '' }); }
+        pRows.push(to >= rows.length ? { d: dNum(viewR.end), t: 'Closing Balance', dr: '', cr: '', b: num2(close), st: 'font-weight:700' } : { d: '', t: 'Balance carried forward to next page', dr: '', cr: '', b: num2(rows[to - 1].bal), st: 'font-style:italic' });
+      }
+      Object.assign(v, {
+        tabs: [['details', 'Details'], ['original', 'Original']].map((t) => ({ t: t[1], sel: vTab === t[0], style: vTab === t[0] ? 'background:var(--primary);color:var(--primaryInk);border:0' : 'background:var(--surface);color:var(--ink);border:1px solid var(--outline)', pick: () => this.setState({ vTab: t[0] }) })),
+        tabDetails: vTab === 'details', tabOriginal: vTab === 'original', isCsv, isPdf: !isCsv, fsCls: st.vfs ? 'fs' : '', fsOn: !!st.vfs, fsOff: !st.vfs, fsLabel: st.vfs ? 'Exit full screen' : 'Full screen', fsToggle: () => this.setState({ vfs: !st.vfs }),
+        pgLabel: 'Page ' + pg + ' of ' + nPages, zoomLabel: Math.round(ZS[zi] * 100) + '%',
+        prev: () => this.setState({ pg: Math.max(1, pg - 1) }), next: () => this.setState({ pg: Math.min(nPages, pg + 1) }), noPrev: pg <= 1, noNext: pg >= nPages,
+        zOut: () => this.setState({ zi: Math.max(0, zi - 1) }), zIn: () => this.setState({ zi: Math.min(ZS.length - 1, zi + 1) }), noZOut: zi <= 0, noZIn: zi >= ZS.length - 1,
+        thumbs: Array.from({ length: nPages }, (_, k) => ({ n: String(k + 1), cls: k + 1 === pg ? 'on' : '', go: () => this.setState({ pg: k + 1 }), aria: 'Page ' + (k + 1) })),
+        paperStyle: 'width:' + Math.round(600 * ZS[zi]) + 'px;font-size:' + (10.5 * ZS[zi]).toFixed(1) + 'px',
+        p1: !isCsv && pg === 1, pTx: !isCsv && pg >= 2, pRows,
+        docTitle: isLoan ? 'HOME LOAN' : 'ACCOUNT STATEMENT', docLender: s.lender, docAcct: (isLoan ? 'Loan account' : 'Account') + ' ending ' + (s.id === 'h2' ? '02' : '01'),
+        docStart: dNum(viewR.start), docEnd: dNum(viewR.end), docPage: pg + ' of ' + nPages,
+        docSum: [['Opening Balance', num2(v.open)], [isLoan ? 'Interest Charge for the Period' : 'Total Credits', num2(isLoan ? interest : credits)], [isLoan ? 'Total Credits' : 'Total Debits', num2(isLoan ? credits : debits)], ['Closing Balance', num2(close)]].map((x) => ({ k: x[0], v: x[1] })),
+        docExtra: s.id === 'h1' && viewR.i === 0 ? [['Payments in Advance', num2(T.inAdvance)], ['Contract Term Remaining', T.termLeft], ['Forecasted Term', T.forecastTerm], ['Annual Percentage Rate', (lastRate || 0).toFixed(3) + '%']].map((x) => ({ k: x[0], v: x[1] })) : [],
+        hasExtra: s.id === 'h1' && viewR.i === 0,
+        csvRows: isCsv ? rows.map((x, k) => ({ c1: x.dt.toLocaleDateString('en-AU'), c2: x.desc, c3: (x.credit ? '' : '-') + num2(x.credit || x.debit), c4: num2(x.bal), st: k === hl ? 'background:#fff1a6' : '' })) : [],
+        hlNote: hl >= 0 ? 'Highlighted: the transaction you picked on the Details tab.' : 'Press a transaction on the Details tab to find it here.'
+      });
+      Object.assign(v, {
+        title: range(viewR.start, viewR.end), src: s.name, srcHref: isLoan ? 'Main.dc.html' : 'Accounts.dc.html', lender: s.lender,
+        meta: s.lender + ' · ' + s.fmt + ' · ' + plural(s.pages, 'page'), status: viewR.status, chip: chipOf(viewR.status), icon: 'flex:none;width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--onA);background:var(--' + s.slot + ')',
+        needsLayout, notLayout: !needsLayout, attn, isLoan,
+        closeLabel: isLoan ? 'Closing balance' : 'Closing balance', close: needsLayout ? '—' : money2(close),
+        heroLine: needsLayout ? 'Figures appear once the layout is mapped.' : 'Opening ' + money2(v.open) + (isLoan ? ' + interest ' + money2(interest) + ' − repayments ' + money2(credits) : ' + money in ' + money2(credits) + ' − money out ' + money2(debits)),
+        cards: needsLayout ? [] : (isLoan ? [
+          { t: 'Interest charged', v: money2(interest), s: plural(rows.filter((x) => x.desc === 'Interest').length, 'posting'), bg: 'background:var(--a1)' },
+          { t: 'Repayments', v: money2(credits), s: plural(rows.filter((x) => x.desc === 'Repayment').length, 'repayment'), bg: 'background:var(--a2)' },
+          { t: 'Interest rate', v: (lastRate || 0).toFixed(2) + '%', s: rateRows.length ? plural(rateRows.length, 'change') + ' this period' : 'No changes this period', bg: 'background:var(--a3)' }
+        ] : [
+          { t: 'Money in', v: money2(credits), s: plural(rows.filter((x) => x.credit > 0).length, 'deposit'), bg: 'background:var(--a1)' },
+          { t: 'Money out', v: money2(debits), s: plural(rows.filter((x) => x.debit > 0).length, 'payment'), bg: 'background:var(--a2)' },
+          { t: 'Change', v: (close - v.open >= 0 ? '+' : '') + money2(close - v.open), s: 'Over the period', bg: 'background:var(--a3)' }
+        ]),
+        checks: needsLayout ? [] : [
+          { ok: true, text: 'Opening ' + money2(v.open) + (isLoan ? ' + debits ' : ' − money out ') + money2(isLoan ? debits : debits) + (isLoan ? ' − credits ' : ' + money in ') + money2(credits) + ' = closing ' + money2(close) },
+          { ok: true, text: 'Running balance agrees on all ' + rows.length + ' rows' }
+        ].concat(isLoan ? [
+          attn ? { ok: false, text: 'Interest recomputed from daily balances differs by $0.42 from the statement' } : { ok: true, text: 'Interest recomputed from daily balances matches the statement' },
+          { ok: true, text: rateRows.length ? plural(rateRows.length, 'rate change') + ' found and added to the rate history' : 'No rate changes in this period' }
+        ] : []).map((c) => Object.assign(c, { bad: !c.ok, good: c.ok })),
+        details: [
+          ['Period', range(viewR.start, viewR.end)],
+          ['Goes to', s.name],
+          ['Layout', needsLayout ? 'Not mapped yet' : (() => { const m = lyOf(s, viewR.end); return m ? m.L.name + ', version ' + m.n : 'Not mapped yet'; })()],
+          ['Imported', dLong(new Date(viewR.end.getTime() + 4 * DAY)) + ' by Alex']
+        ].concat((st.revNotes || {})[viewR.key] ? [['Reviewed', (st.revNotes[viewR.key].on) + ' by Alex' + (st.revNotes[viewR.key].note ? ': ' + st.revNotes[viewR.key].note : '')]] : []).concat(s.id === 'h1' && viewR.i === 0 ? [['Repayment', T.repay], ['Payments in advance', money2(T.inAdvance)], ['Term remaining', T.termLeft], ['Forecasted term', T.forecastTerm]] : []).map((x) => ({ k: x[0], v: x[1] })),
+        txTabs: (isLoan ? [['all', 'All'], ['rep', 'Repayments'], ['int', 'Interest'], ['rate', 'Rate changes']] : [['all', 'All'], ['rep', 'Money in'], ['out', 'Money out']]).map((o) => ({ t: o[1], sel: txF === o[0], style: chipSt(txF === o[0]), pick: () => this.setState({ txF: o[0] }) })),
+        txs: txShown.map((x) => ({ show: () => this.setState({ vTab: 'original', pg: s.fmt === 'CSV' ? 1 : 2 + Math.floor(x.n / 30), hl: x.n }), date: dShort(x.dt), desc: x.desc, amt: x.rate ? '' : x.debit ? (isLoan ? '+' : '−') + money2(x.debit).replace('$', '$') : (isLoan ? '−' : '+') + money2(x.credit), tone: x.rate ? 'color:var(--muted)' : (x.credit && !isLoan) || (x.credit && isLoan) ? 'color:var(--sel);font-weight:700' : 'color:var(--ink)', bal: money2(x.bal) })),
+        txCount: needsLayout ? 'Transactions appear once the layout is mapped.' : plural(txShown.length, 'transaction'),
+        reviewing: !!st.reviewing, notReviewing: !st.reviewing, revNote: st.revNote || '', onRevNote: (e) => this.setState({ revNote: e.target.value }),
+        startReview: () => this.setState({ reviewing: true, revNote: '' }), cancelReview: () => this.setState({ reviewing: false }),
+        markReviewed: () => { const notes = Object.assign({}, st.revNotes || {}); notes[viewR.key] = { note: (st.revNote || '').trim(), on: dLong(today0) }; this.setState({ reviewed: Object.assign({}, reviewed, { [viewR.key]: true }), revNotes: notes, reviewing: false }); this.flash('Marked as reviewed. Folio keeps the statement figure.'); },
+        confirming: st.vAsk === 'confirm',
+        ask: (ev) => { try { ev.currentTarget.closest('details').removeAttribute('open'); } catch (x) {} this.setState({ vAsk: 'confirm' }); },
+        cancel: () => this.setState({ vAsk: null }),
+        confirm: () => { this.setState({ deleted: Object.assign({}, deleted, { [viewR.key]: true }), vAsk: null, viewKey: null }); this.flash('Statement deleted. Restore it from Deleted Statements.'); },
+        download: (ev) => { try { ev.currentTarget.closest('details').removeAttribute('open'); } catch (x) {} this.flash('Downloading the original ' + s.fmt + ' (sample)'); }
+      });
+    }
+    const delRows = all.filter((r) => deleted[r.key]).map((r) => ({ name: r.s.name, sub: range(r.start, r.end), asking: st.restoreKey === r.key, idle: st.restoreKey !== r.key,
+      ask: () => this.setState({ restoreKey: r.key }), cancel: () => this.setState({ restoreKey: null }),
+      restore: () => { const d = Object.assign({}, deleted); delete d[r.key]; this.setState({ deleted: d, restoreKey: null }); this.flash('Statement restored'); } }));
+    const ex = st.ex || {};
+    const files = ex.files ?? true, csv = ex.csv ?? true, rm = ex.rm ?? false;
+    const setEx = (k, val) => this.setState({ ex: Object.assign({}, ex, { [k]: val }) });
+    const visKeys = {}; groups.forEach((g) => g.rows.forEach((r) => { if (!r.isMissing) visKeys[r.key] = 1; }));
+    const selectable = shown.filter((r) => !r.missing && visKeys[r.key]);
+    const allOn = selectable.length > 0 && selectable.every((r) => picks[r.key]);
+    return Object.assign(this.baseVals(), {
+      isEmpty: empty, notEmpty: !empty, addPulse: empty ? 'addpulse' : '',
+      subtitle: empty ? 'No statements yet' : [plural(real.length, 'statement'), attention ? plural(attention, 'needs attention', 'need attention') : '', missingN ? missingN + ' missing' : ''].filter(Boolean).join(' · '),
+      showList: !viewR, showView: !!viewR, v, closeView: () => this.setState({ viewKey: null, vAsk: null }),
+      isIdle: stage === 'idle' || stage === 'done', isReview: stage === 'review', isDone: stage === 'done',
+      choose: () => this.setState({ stage: 'review', dest: 'bills', link: null, who: {}, rateOk: true, skip: false, skip2: false, ly1: null, ly2: null, lyFor: null }),
+      revTitle: plural(3, 'file') + ' read. ' + (nReady ? plural(nReady, 'is', 'are') + ' ready to import.' : 'None of them can be imported yet.'),
+      f1: Object.assign(fileOut(F1, '1'), { checks: (F1.ok ? checks1 : badChecks(F1)).map((c) => Object.assign(c, { good: c.ok, bad: !c.ok })) }),
+      f2: Object.assign(fileOut(F2, '2'), { checks: checks2.map((c) => Object.assign(c, { good: c.ok, bad: !c.ok })), inc: !skip2, file: 'example-bank-statement-aug-2023.pdf', meta: range(new Date(2023, 1, 12), new Date(2023, 7, 11)) + ' · ' + plural(3, 'page'), dest: oldSrc.name,
+        note: 'An older statement. Its format matches version ' + F2.auto.n + ' of ' + F2.auto.L.name + ' (' + verRange(F2.auto.L, F2.auto.n) + '), not the current version ' + F2.auto.L.v.length + ', so Folio picked version ' + F2.auto.n + '.', skip: () => this.setState({ skip2: !skip2 }), skipLabel: skip2 ? 'Include this file' : 'Skip this file' }),
+      lyOn: !!FL, lyOpts: FL ? FL.opts : [], lySub: lyFor === '2' ? 'example-bank-statement-aug-2023.pdf' : 'Statement for ' + dest.name, closeLy: () => this.setState({ lyFor: null }),
+      importLabel: 'Import ' + plural(nReady, 'statement'),
+      file1: dest.lender.toLowerCase().replace(/\s+/g, '-') + '-statement-' + target.end.toLocaleDateString('en-AU', { month: 'short', year: 'numeric' }).toLowerCase().replace(/\s+/g, '-') + '.pdf',
+      file1Meta: range(target.start, target.end) + ' · ' + plural(2, 'page'),
+      checks1: checks1.map((c) => Object.assign(c, { good: c.ok, bad: !c.ok })), people,
+      destName: dest.name, destKind: dest.kind === 'loan' ? 'Loan split' : 'Account', openDest: () => this.setState({ destPick: true }), destOn: !!st.destPick, destOpts, closeDest: () => this.setState({ destPick: false }),
+      destIsLoan: dest.kind === 'loan', linkQ: 'The names on this statement match Alex and Sam. Link the statement to them?',
+      linkYes: () => this.setState({ link: 'yes' }), linkNo: () => this.setState({ link: 'no' }),
+      linkIsYes: link === 'yes', linkIsNo: link === 'no',
+      yesPill: this.pill(link === 'yes'), noPill: this.pill(link === 'no'),
+      rateOk: st.rateOk !== false, toggleRate: () => this.setState({ rateOk: st.rateOk === false }),
+      skipLabel: st.skip ? 'Skipped' : 'Skip this file', skipFile: () => this.setState({ skip: !st.skip }),
+      cantConfirm: !linkReady || blockers || !nReady,
+      hint: blockers ? 'A file has a layout that does not fit. Use the matched layout or skip the file' : !link ? 'Choose whether to link the statement to Alex and Sam' : (link === 'no' && !pickedAny) ? 'Pick at least one person' : '',
+      confirm: () => this.setState({ stage: 'done', ly2Ok: F2.ok }), discard: () => this.setState({ stage: 'idle', askDiscard: false }),
+      asking: !!st.askDiscard, notAsking: !st.askDiscard, askDiscard: () => this.setState({ askDiscard: true }), cancelAsk: () => this.setState({ askDiscard: false }),
+      doneText: 'Imported ' + plural(nReady, 'statement') + '. ' + dest.name + ' (' + monthName(target.end) + '): ' + plural(nTx - nDup, 'transaction') + ' added, ' + plural(nDup, 'duplicate') + ' skipped. The balance ties out to the cent.' + (!skip2 ? ' ' + oldSrc.name + ' (' + monthName(new Date(2023, 7, 11)) + ') was added to its history, read with ' + F2.auto.L.name + ' version ' + F2.auto.n + '.' : ''),
+      groups, hasRows: selectable.length > 0, noMatch: !empty && shown.length === 0,
+      allSel: allOn, allBox: (allOn ? tOn : tOff).box, allTick: (allOn ? tOn : tOff).tick,
+      selText: nSel ? nSel + ' selected' : 'Select all',
+      toggleAll: () => { const p = Object.assign({}, picks); selectable.forEach((r) => { if (allOn) delete p[r.key]; else p[r.key] = true; }); this.setState({ picks: p }); },
+      exNone: nSel === 0, exAria: nSel ? 'Export ' + nSel + ' selected' : 'Export (select statements first)',
+      delAria: nSel ? 'Delete ' + nSel + ' selected' : 'Delete (select statements first)',
+      exOn: !!st.exOpen, openExport: () => { if (nSel) this.setState({ exOpen: true, ex: {} }); }, closeExport: () => this.setState({ exOpen: false }),
+      exChecks: [['files', 'Original files', 'PDF or CSV as imported, in a ZIP', files], ['csv', 'CSV summary', 'One row per statement', csv], ['rm', 'Include deleted', 'Statements you deleted', rm]].map((c) => ({ t: c[1], d: c[2], on: c[3], toggle: () => setEx(c[0], !c[3]) })),
+      exBad: (!files && !csv) || nSel === 0,
+      exNote: (!files && !csv) ? 'Pick at least one thing to include.' : nSel + (nSel === 1 ? ' selected statement' : ' selected statements') + (files && csv ? ', as a ZIP with the files and a summary.' : files ? ', as a ZIP of the original files.' : ', as one CSV file.'),
+      exGo: () => { this.setState({ exOpen: false, picks: {} }); this.flash('Export started (sample)'); },
+      delAsk: !!st.delAsk && nSel > 0, delText: 'Delete ' + plural(nSel, 'statement') + '? Their transactions come out of balances and forecasts. You can restore them from Deleted Statements.',
+      askDel: () => { if (nSel) this.setState({ delAsk: true }); }, cancelDel: () => this.setState({ delAsk: false }),
+      doDel: () => { const d = Object.assign({}, deleted); Object.keys(picks).forEach((k) => { d[k] = true; }); this.setState({ deleted: d, picks: {}, delAsk: false }); this.flash(plural(nSel, 'statement') + ' deleted'); },
+      delRows, delHas: delRows.length > 0, delCount: String(delRows.length),
+      fSheetOn: !!st.fSheet, openFilters: () => this.setState({ fSheet: true }), closeFilters: () => this.setState({ fSheet: false }),
+      filtersOn: nF > 0, filterCount: String(nF), clearFilters: () => this.setState({ fShow: 'all', fStatus: 'all', fSrc: 'all', fYear: 'all', sort: 'new', perGroup: '5', more: {} }), showLabel: 'Show ' + shown.length,
+      fGroups: [
+        grp('Show', fShow, 'fShow', [['all', 'All'], ['loan', 'Loans'], ['account', 'Accounts']]),
+        grp('Status', fStatus, 'fStatus', [['all', 'All'], ['Needs attention', 'Needs attention'], ['Needs layout', 'Needs layout'], ['Missing', 'Missing'], ['Reconciled', 'Reconciled']]),
+        grp('Loan or account', fSrc, 'fSrc', [['all', 'All']].concat(srcs.map((s) => [s.id, s.name]))),
+        grp('Year', fYear, 'fYear', [['all', 'All']].concat(years.map((y) => [y, y]))),
+        grp('Sort by', sort, 'sort', [['new', 'Newest first'], ['old', 'Oldest first']]),
+        grp('Per group', st.perGroup || '5', 'perGroup', [['5', '5'], ['10', '10'], ['all', 'All']])
+      ],
+      filterSummary: shown.length < stmts.length ? 'Showing ' + shown.length + ' of ' + stmts.length + ' statements' : 'Showing all statements'
+    });
+  }
+}
+</script>
+</body>
+</html>
