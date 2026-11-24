@@ -4,7 +4,7 @@ Self-hosted bookkeeping for Australian sole traders. Import your business bank a
 
 SoloFlow started as a branch of Folio, a home-loan statement app, and keeps its look, statement reading, layouts, sign-in and backups.
 
-This guide gets it running on your computer with Node.js and PostgreSQL.
+This guide gets it running on your computer with Node.js and PostgreSQL. For Unraid, see `docs/UNRAID.md` (a Docker image and an Unraid template).
 
 ## What you need
 
@@ -65,6 +65,15 @@ npm run build
 npm start
 ```
 
+## Docker
+
+The `Dockerfile` builds the image the Unraid template uses (GitHub publishes it to `ghcr.io/ausrasplex/soloflow`). It needs `DATABASE_URL` and `SOLOFLOW_SECRET`, listens on port 3000, writes backups to `/backups`, and applies database migrations each time it starts:
+
+```
+docker build -t soloflow .
+docker run -p 3000:3000 -e DATABASE_URL=... -e SOLOFLOW_SECRET=... -v ./backups:/backups soloflow
+```
+
 ## Using it
 
 - **Add an account** from the + button: a business transaction or savings account, or a business credit card. You can attach its first statement as you go.
@@ -120,5 +129,6 @@ sh tools/testdb-reset.sh --empty && node tools/e2e/first-run.js   # empty server
 | `src/components` | The shared frame (`AppData`, `AppShell`) and the sign-in card |
 | `src/lib/server` | Data access, actions, statement reading, backups, alerts |
 | `prisma` | Database schema, migrations and the demo seed |
-| `tools` | The mockup converter, test data and browser tests |
+| `tools` | The mockup converter, test data, browser tests and the container start script |
+| `unraid` | The Unraid template (`docs/UNRAID.md` explains it) |
 | `docs/SPEC.md` | The product spec |

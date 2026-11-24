@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>SoloFlow</Name>
+  <Repository>ghcr.io/ausrasplex/soloflow:latest</Repository>
+  <Registry>https://github.com/ausrasplex/soloflow/pkgs/container/soloflow</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/ausrasplex/soloflow</Support>
+  <Project>https://github.com/ausrasplex/soloflow</Project>
+  <Overview>Self-hosted bookkeeping for Australian sole traders. Import business bank and credit card statements (PDF or CSV), check they add up, and keep everything on your own server.[br][br]Needs a PostgreSQL 14+ database: install a PostgreSQL 16 container first, create a "soloflow" user and database, then fill in Database URL below. Read docs/UNRAID.md in the repository for the steps.</Overview>
+  <Category>Productivity: Tools:</Category>
+  <WebUI>http://[IP]:[PORT:3000]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/ausrasplex/soloflow/main/unraid/soloflow.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/ausrasplex/soloflow/main/public/icon.png</Icon>
+  <ExtraParams>--user 99:100</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>A PostgreSQL 14 or newer database (for example the postgresql16 container from Community Applications).</Requires>
+  <Config Name="Web port" Target="3000" Default="3000" Mode="tcp" Description="Port for the SoloFlow web page." Type="Port" Display="always" Required="true" Mask="false">3000</Config>
+  <Config Name="Backups" Target="/backups" Default="/mnt/user/appdata/soloflow/backups" Mode="rw" Description="Where automatic and manual backups are written. Include this folder in your own backups too." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/soloflow/backups</Config>
+  <Config Name="Database URL" Target="DATABASE_URL" Default="" Mode="" Description="postgresql://soloflow:PASSWORD@UNRAID-IP:5432/soloflow?schema=public" Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="Secret" Target="SOLOFLOW_SECRET" Default="" Mode="" Description="A long random string (32+ characters) that encrypts account numbers and two-step secrets. Keep a copy somewhere safe and never change it: without it they cannot be read, even from a backup." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="Address" Target="SOLOFLOW_URL" Default="" Mode="" Description="Optional. The address people use to reach SoloFlow, for links in alerts and invites, for example http://tower.local:3000" Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="Time zone" Target="TZ" Default="Australia/Melbourne" Mode="" Description="Time zone for backup times and dates." Type="Variable" Display="advanced" Required="false" Mask="false">Australia/Melbourne</Config>
+  <Config Name="Secure cookies" Target="SOLOFLOW_SECURE_COOKIE" Default="false" Mode="" Description="Set to true only when SoloFlow is reached over HTTPS (for example behind a reverse proxy)." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="Update check address" Target="SOLOFLOW_UPDATE_URL" Default="" Mode="" Description="Optional. A JSON address that answers {&quot;version&quot;: &quot;x.y.z&quot;}, for the Check for updates button." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+</Container>

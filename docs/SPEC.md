@@ -60,8 +60,11 @@ export are made for the sole trader or their accountant.
 - Right-side drawers on desktop, bottom sheets on phones.
 
 ## Brand
-- Name: **SoloFlow**, with the same look and feel as Folio. The mark and app icon are Folio's for now; a new mark in
-  the same style comes in step 7 (brand and polish).
+- Name: **SoloFlow**. The mark is an "S" made of two leaf-shaped strokes (purple #AF97FE above, lime #D4EF6A below)
+  around a peach circle (#FDCCA1), traced from the user's artwork into `public/mark.svg` (transparent background).
+- In the app the mark sits on a navy #160F42 rounded tile (32px in the sidebar with the word "SoloFlow", 40px on
+  phones). App icon: `public/icon.svg` and `icon.png` (the mark on a navy rounded square); `soloflow-logo.png` is the
+  mark alone on a transparent background.
 
 ## Design System (carried over from Folio)
 

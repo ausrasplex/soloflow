@@ -9,7 +9,7 @@ const CSS = `
 body{background:var(--bg);color:var(--ink)}
 .auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;box-sizing:border-box}
 .authcard{width:100%;max-width:420px;background:var(--surface);border-radius:28px;padding:32px 28px;box-sizing:border-box;display:flex;flex-direction:column;gap:18px;box-shadow:0 10px 40px rgba(0,0,0,.06)}
-.authmark{width:56px;height:56px;border-radius:18px;background:#2b2849;display:flex;align-items:center;justify-content:center}
+.authmark{width:56px;height:56px;border-radius:18px;background:#160F42;display:flex;align-items:center;justify-content:center}
 .authmark svg{width:28px;height:32px}
 .authcard h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em}
 .authcard p{margin:0;font-size:14px;color:var(--muted);line-height:1.5}
