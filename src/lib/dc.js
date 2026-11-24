@@ -2,7 +2,7 @@
 // Runtime for screens generated from the mockup boards (tools/convert.py).
 import React from 'react';
 
-export const HostCtx = React.createContext({ data: null, act: async () => null, reload: async () => null });
+export const HostCtx = React.createContext({ data: null, act: async () => null, reload: async () => null, theme: null, setTheme: () => {} });
 
 // Base class: the mockup logic classes used DCLogic, which behaves like a React class component.
 export class DCBase extends React.Component {
@@ -19,20 +19,21 @@ export class DCBase extends React.Component {
     try { const r = await this.act(kind, payload); if (okMsg && this.flash) this.flash(okMsg); return r; }
     catch (e) { if (this.flash) this.flash(e.message); else if (typeof window !== 'undefined') window.alert(e.message); return null; }
   }
-  saveThemeServer(theme, mode) { try { this.act('theme', { theme, mode }, { reload: false }); } catch (e) {} }
-  /** Values every screen shares: you, the household and the alerts. Merged over each screen's own values. */
+  /** Saves the theme on the server and repaints the shared frame straight away. */
+  saveThemeServer(theme, mode) { try { if (this.context && this.context.setTheme) this.context.setTheme(theme, mode); this.act('theme', { theme, mode }, { reload: false }); } catch (e) {} }
+  /** Values every screen shares: you, the business and the alerts. Merged over each screen's own values. */
   common() {
     const d = this.data; const me = d.me || {}; const st = this.state || {};
     const read = (me.readAlerts || []);
     const notifs = (d.notifications || []).map((n) => {
       const unread = read.indexOf(n.id) < 0;
       return Object.assign({}, n, { dot: unread ? 'background:var(--primary)' : 'background:transparent',
-        open: () => { if (n.fo) { try { window.localStorage.setItem('folioOpen', JSON.stringify(Object.assign({ t: Date.now() }, n.fo))); } catch (e) {} } this.act('alertsRead', { ids: [n.id] }, { reload: false }); } });
+        open: () => { if (n.fo) { try { window.localStorage.setItem('soloflowOpen', JSON.stringify(Object.assign({ t: Date.now() }, n.fo))); } catch (e) {} } this.act('alertsRead', { ids: [n.id] }, { reload: false }); } });
     });
     const unreadCount = notifs.filter((n) => read.indexOf(n.id) < 0).length;
     return {
       meIni: me.initials || '?', mePhotoSt: me.photo ? ";background:var(--a1) url('" + me.photo + "') center/cover no-repeat;color:transparent" : '',
-      hhLabel: (d.household && d.household.name) || 'Household',
+      bizLabel: (d.business && d.business.name) || 'Business',
       notifs, unreadCount, hasUnread: unreadCount > 0, allRead: unreadCount === 0, noNotifs: notifs.length === 0,
       notifsOpen: !!st.notifsOpen, toggleNotifs: () => this.setState({ notifsOpen: !st.notifsOpen }),
       markAll: () => this.act('alertsRead', { ids: notifs.map((n) => n.id) })
@@ -40,30 +41,30 @@ export class DCBase extends React.Component {
   }
   notifRead() { return ((this.data.me || {}).readAlerts) || []; }
   notifMark(ids) { this.act('alertsRead', { ids }); }
-  hhSaved() { return (this.data.household && this.data.household.name) || 'Household'; }
+  bizSaved() { return (this.data.business && this.data.business.name) || 'Business'; }
 }
 
-/** The household name in the header; opens a menu to switch when you belong to more than one. */
-export function HouseholdSwitch({ style, chevron }) {
+/** The business name in the header; opens a menu to switch when you belong to more than one. */
+export function BusinessSwitch({ style, chevron }) {
   const ctx = React.useContext(HostCtx);
   const [open, setOpen] = React.useState(false);
   const d = ctx.data || {};
-  const all = d.households || [];
+  const all = d.businesses || [];
   return (
     <span style={{ position: 'relative', display: 'inline-flex' }}>
-      <button className="hbs" type="button" style={style} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>{(d.household && d.household.name) || 'Household'} {chevron}</button>
+      <button className="hbs" type="button" style={style} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>{(d.business && d.business.name) || 'Business'} {chevron}</button>
       {open ? (
         <>
           <span onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
           <span role="menu" style={{ position: 'absolute', top: 50, left: 0, zIndex: 50, minWidth: 260, background: 'var(--surface)', color: 'var(--ink)', border: '1px solid var(--line)', borderRadius: 20, padding: 8, boxShadow: '0 12px 32px rgba(0,0,0,.18)', display: 'flex', flexDirection: 'column' }}>
-            <span style={{ padding: '8px 12px 4px', fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>Your households</span>
+            <span style={{ padding: '8px 12px 4px', fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>Your businesses</span>
             {all.map((h) => (
-              <button key={h.id} type="button" role="menuitemradio" aria-checked={h.current} className="hhopt" onClick={async () => { setOpen(false); if (!h.current) { await ctx.act('switchHousehold', { id: h.id }); window.location.reload(); } }}
+              <button key={h.id} type="button" role="menuitemradio" aria-checked={h.current} className="bizopt" onClick={async () => { setOpen(false); if (!h.current) { await ctx.act('switchBusiness', { id: h.id }); window.location.reload(); } }}
                 style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 44, padding: '0 12px', border: 0, borderRadius: 12, background: h.current ? 'var(--surface2)' : 'transparent', color: 'var(--ink)', font: 'inherit', fontSize: 14, fontWeight: 600, textAlign: 'left', cursor: 'pointer' }}>
                 <span style={{ flex: 1 }}>{h.name}</span><span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 500 }}>{h.role}</span>
               </button>
             ))}
-            <a href="/settings" style={{ display: 'flex', alignItems: 'center', minHeight: 44, padding: '0 12px', borderRadius: 12, fontSize: 14, fontWeight: 600, color: 'var(--ink)', textDecoration: 'none', borderTop: '1px solid var(--line)', marginTop: 4 }}>Household settings</a>
+            <a href="/settings" style={{ display: 'flex', alignItems: 'center', minHeight: 44, padding: '0 12px', borderRadius: 12, fontSize: 14, fontWeight: 600, color: 'var(--ink)', textDecoration: 'none', borderTop: '1px solid var(--line)', marginTop: 4 }}>Business settings</a>
           </span>
         </>
       ) : null}
@@ -109,7 +110,7 @@ export function css(str) {
 }
 
 // Mockup board links -> app routes (used for links built in the logic).
-const ROUTES = { Loans: '/loans', Main: '/loan', Setup: '/loans/new', Accounts: '/accounts', AddAccount: '/accounts/new', Statements: '/statements', Settings: '/settings', Profile: '/profile', Lenders: '/settings', Brokers: '/settings', Layouts: '/settings' };
+const ROUTES = { Dashboard: '/dashboard', Accounts: '/accounts', AddAccount: '/accounts/new', Statements: '/statements', Settings: '/settings', Profile: '/profile', Banks: '/settings', Layouts: '/settings' };
 export function R(href) {
   if (typeof href !== 'string') return href;
   const m = href.match(/^([A-Za-z]+)\.dc\.html(#.*)?$/);
