@@ -2,13 +2,14 @@ import JSZip from 'jszip';
 import { currentMembership, currentUser } from '@/lib/server/auth';
 import { db } from '@/lib/server/db';
 import { dec } from '@/lib/server/crypto';
+import { visibleAccounts } from '@/lib/server/access';
 
 export const dynamic = 'force-dynamic';
 const q = (v: unknown) => { const s = v == null ? '' : v instanceof Date ? v.toISOString().slice(0, 10) : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 const csv = (head: string[], rows: unknown[][]) => [head.join(',')].concat(rows.map((r) => r.map(q).join(','))).join('\n') + '\n';
 const safe = (s: string) => s.replace(/[^\w.\- ]/g, '_');
 
-/** Your own data in this business: the accounts you hold. fmt=csv|json, files=1 adds the original statements. */
+/** Your own data in this business: the accounts you can see. fmt=csv|json, files=1 adds the original statements. */
 export async function GET(req: Request) {
   const u = await currentUser();
   if (!u) return new Response('Sign in again', { status: 401 });
@@ -16,7 +17,7 @@ export async function GET(req: Request) {
   if (!m) return new Response('Not found', { status: 404 });
   const sp = new URL(req.url).searchParams;
   const fmt = sp.get('fmt') === 'json' ? 'json' : 'csv', withFiles = sp.get('files') === '1';
-  const accts = await db.account.findMany({ where: { businessId: m.businessId, deletedAt: null, holders: { some: { userId: u.id } } }, include: { bank: true, statements: { where: { deletedAt: null }, include: { txns: true, file: withFiles } } } });
+  const accts = await db.account.findMany({ where: { businessId: m.businessId, deletedAt: null, ...visibleAccounts(u.id, m.role) }, include: { bank: true, statements: { where: { deletedAt: null }, include: { txns: true, file: withFiles } } } });
   const stamp = new Date().toISOString().slice(0, 10);
   const zip = new JSZip();
   const strip = <T extends Record<string, unknown>>(o: T) => JSON.parse(JSON.stringify(o, (k, v) => (k === 'file' || k === 'data' ? undefined : v)));

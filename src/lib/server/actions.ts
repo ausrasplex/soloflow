@@ -16,13 +16,6 @@ export const str = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, ma
 export const d = (v: unknown) => { const s = String(v || ''); if (!s) return null; const x = new Date(s.length === 10 ? s + 'T00:00:00Z' : s); return isNaN(+x) ? null : x; };
 export const money = (v: unknown) => { const n = Number(String(v ?? '').replace(/[$,\s]/g, '')); return isFinite(n) ? Math.round(n * 100) / 100 : NaN; };
 
-/** Of the people given, those who are current members of this business. */
-export async function memberIds(c: Ctx, ids: unknown) {
-  const list = Array.isArray(ids) ? ids.map(String) : [];
-  const ms = await db.membership.findMany({ where: { businessId: biz(c), removedAt: null, userId: { in: list } } });
-  return ms.map((m) => m.userId);
-}
-
 import { userActions } from './actions/user';
 import { businessActions } from './actions/business';
 import { bankActions } from './actions/banks';

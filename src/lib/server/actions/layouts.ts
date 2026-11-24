@@ -7,7 +7,7 @@ import { myFile } from '../visible';
 export const KINDS = ['account', 'card'];
 
 async function sampleRead(c: Ctx, fileId: string, kind: string, format: string, map: Record<string, unknown>) {
-  const f = await myFile(c.u.id, biz(c), fileId);
+  const f = await myFile(c.u.id, biz(c), c.m!.role, fileId);
   need(f, 'That sample file is not available.');
   const buf = Buffer.from(f!.data);
   if (format === 'CSV') {

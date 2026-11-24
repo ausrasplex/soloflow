@@ -1,6 +1,6 @@
 // Click-through on an EMPTY database (run tools/testdb-reset.sh with --empty first): first-run setup, banks and
 // layouts, adding a bank account with its first PDF statement, importing a CSV statement, reviewing a statement,
-// inviting a second person who joins, and a backup that restores.
+// inviting a viewer who joins and is switched on for one account, and a backup that restores.
 // Run: node tools/e2e/first-run.js   (dev server on BASE, default http://localhost:3100)
 const path = require('path');
 const fs = require('fs');
@@ -71,17 +71,19 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   s = await state();
   check(!!s.statements.find((x) => x.id === st0.id).reviewedAt, 'a statement can be marked as reviewed');
 
-  // 6. invite a second person, who joins the business
-  const inv = await act('createInvite', { role: 'Editor' });
+  // 6. invite a viewer (an accountant), who joins the business and is switched on for one account
+  const inv = await act('createInvite', { role: 'Viewer' });
   const p2 = await (await b.newContext()).newPage();
   await p2.goto(BASE + '/join?t=' + inv.token);
   await p2.fill('input[name=name]', 'Sam Bookkeeper'); await p2.fill('input[name=email]', 'sam@example.test'); await p2.fill('input[name=password]', 'another-long-password');
   await Promise.all([p2.waitForNavigation(), p2.click('button[type=submit]')]);
   const s2 = await (await p2.request.get(BASE + '/api/state')).json();
-  check(s2.business && s2.business.name === 'Example Electrical' && s2.accounts.length === 0, 'the invited person joins and sees no accounts until added to one');
-  await act('editAccount', { id: acct.id, name: acct.name, bankId: acct.bankId, type: acct.type, holders: [s.me.id, s2.me.id] });
+  check(s2.business && s2.business.name === 'Example Electrical' && s2.accounts.length === 0, 'the invited viewer joins and sees no accounts until switched on');
+  await act('setAccountAccess', { accountId: acct.id, userId: s2.me.id, allowed: true });
   const s3 = await (await p2.request.get(BASE + '/api/state')).json();
-  check(s3.accounts.length === 1, 'once added as a holder, they see the account');
+  check(s3.accounts.length === 1 && s3.accounts[0].id === acct.id, 'once switched on for one account, they see just that account');
+  const page = await p2.request.post(BASE + '/api/act', { data: { kind: 'setAccountAccess', payload: { accountId: acct.id, userId: s2.me.id, allowed: false } } });
+  check(page.status() === 400, 'a viewer cannot change who sees an account');
 
   // 7. a backup, read back and restored
   const bk = await act('backupNow', {});

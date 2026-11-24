@@ -27,9 +27,9 @@ export async function POST(req: Request) {
   if (!match.layout && 'near' in match && match.near) {
     await db.layout.update({ where: { id: match.near.id }, data: { status: 'remap', failedNote: new Date().toISOString().slice(0, 10) } }).catch(() => {});
   }
-  const guess = dest || (await guessDest(u.id, m.businessId, match.layout?.bankName || null, match.layout?.kind || null, match.read));
+  const guess = dest || (await guessDest(u.id, m.businessId, m.role, match.layout?.bankName || null, match.layout?.kind || null, match.read));
   if (fd.get('autoSave') && guess && match.read && match.read.ok) {
-    try { const s = await saveImport({ fileId: stored.id, destId: guess, userId: u.id, businessId: m.businessId }); return Response.json({ saved: true, ...s }); } catch { /* falls through to review */ }
+    try { const s = await saveImport({ fileId: stored.id, destId: guess, userId: u.id, businessId: m.businessId, role: m.role }); return Response.json({ saved: true, ...s }); } catch { /* falls through to review */ }
   }
   return Response.json({
     fileId: stored.id, name: f.name, size: f.size, format: /\.csv$/i.test(f.name) ? 'CSV' : 'PDF',

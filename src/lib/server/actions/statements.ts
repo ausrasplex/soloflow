@@ -5,7 +5,7 @@ import { myStatements } from '../visible';
 
 /** A statement on an account you can see. */
 async function myStatement(c: Ctx, id: unknown, deleted = false) {
-  const s = await db.statement.findFirst({ where: { id: str(id), ...myStatements(c.u.id, biz(c), deleted) } });
+  const s = await db.statement.findFirst({ where: { id: str(id), ...myStatements(c.u.id, biz(c), c.m!.role, deleted) } });
   need(s, 'That statement is not one of yours.');
   return s!;
 }
@@ -15,7 +15,7 @@ export const statementActions: Record<string, Action> = {
     const out = [];
     const items = Array.isArray(c.p.items) ? c.p.items : [{ fileId: c.p.fileId, dest: c.p.dest }];
     for (const it of items) {
-      try { out.push({ fileId: it.fileId, ok: true, ...(await saveImport({ fileId: str(it.fileId), destId: str(it.dest), userId: c.u.id, businessId: biz(c) })) }); }
+      try { out.push({ fileId: it.fileId, ok: true, ...(await saveImport({ fileId: str(it.fileId), destId: str(it.dest), userId: c.u.id, businessId: biz(c), role: c.m!.role })) }); }
       catch (e) { out.push({ fileId: it.fileId, ok: false, error: e instanceof Error ? e.message : 'Could not import' }); }
     }
     return { results: out };

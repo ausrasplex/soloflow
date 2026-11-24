@@ -36,7 +36,7 @@ model User {
   currentBusinessId String?
   memberships   Membership[]
   sessions      Session[]
-  holding       AccountHolder[]
+  accountAccess AccountAccess[]
   channels      Channel[]
   createdAt     DateTime       @default(now())
 }
@@ -132,18 +132,23 @@ model Account {
   nameOnAccount  String?
   openingBalance Decimal         @default(0) @db.Decimal(14, 2)
   openingDate    DateTime?
-  holders        AccountHolder[]
+  access         AccountAccess[]
   statements     Statement[]
   createdAt      DateTime        @default(now())
   closedAt       DateTime?
   deletedAt      DateTime?
 }
 
-model AccountHolder {
-  account   Account @relation(fields: [accountId], references: [id])
-  accountId String
-  user      User    @relation(fields: [userId], references: [id])
-  userId    String
+// Who can see an account. With no row, a member gets their role's default: owners always see every account,
+// editors see accounts unless switched off, viewers see only accounts switched on for them (src/lib/server/access.ts).
+model AccountAccess {
+  account     Account  @relation(fields: [accountId], references: [id])
+  accountId   String
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  allowed     Boolean
+  changedAt   DateTime @default(now())
+  changedById String?
 
   @@id([accountId, userId])
 }

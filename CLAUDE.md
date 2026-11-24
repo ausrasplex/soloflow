@@ -3,7 +3,7 @@
 - Self-hosted Next.js 15 + Prisma 6 + PostgreSQL bookkeeping app for Australian sole traders, branched from Folio. Read `README.md` and `docs/SPEC.md` first. The product brief and decisions live in the claude.ai Project.
 - Signed-in pages are in `src/app/(app)`: each folder has `page.tsx` and its screen beside it. `src/app/(app)/layout.tsx` loads the data once (`AppData`, from `/api/state`, built in `src/lib/server/state.ts`) and draws the shared frame (`AppShell`). Screens draw only their own content; never add a nav, top bar or footer to a screen.
 - Changes go through `/api/act` (`src/lib/server/actions/*`), and each action checks access itself.
-- Access rules are strict: an account and its statements are visible only to its holders. Shared records (banks, layouts) never reveal private ones. Business roles cover business settings only.
+- Access rules are strict and live in `src/lib/server/access.ts`: owners see every account, editors see accounts unless switched off, viewers only those switched on (AccountAccess rows hold the switches). Always filter accounts and statements with `visibleAccounts` / `myStatements`. Shared records (banks, layouts) never reveal private ones.
 - Statement layouts have two kinds: `account` (balance held) and `card` (balance owed). Credit card accounts take card layouts.
 - New data-heavy screens (transactions, BAS, reports) load their own data per page, server-side and paged, not through `/api/state`.
 - New screens from mockups: `python3 tools/convert.py Name` after adding the board to SCREENS.

@@ -42,7 +42,10 @@ export are made for the sole trader or their accountant.
 
 ## Access Model
 - Users and businesses are many-to-many, so a bookkeeper or partner can help more than one sole trader.
-- Business roles govern business settings only. An account and its statements are visible only to its holders.
+- Who sees an account comes from the business role, with a switch per person on each account (`src/lib/server/access.ts`):
+  owners always see every account (locked on); editors see accounts unless switched off; viewers see only accounts
+  switched on for them. Only owners change the switches, on the account page (Who Can See It) or when adding an account.
+  A switch that matches the role's default is not stored, so changing someone's role still applies.
 - Admin is a server-wide account type (the first person on the server) for backups, restore and server settings. It
   does not grant access to other people's accounts.
 - Shared records (banks, layouts) never reveal anything about accounts you cannot see.

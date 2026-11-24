@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   const ids = (sp.get('ids') || '').split(',').filter(Boolean).slice(0, 2000);
   const files = sp.get('files') !== '0', csv = sp.get('csv') !== '0', withDeleted = sp.get('deleted') === '1';
   const rows = await db.statement.findMany({
-    where: { ...myStatements(u.id, m.businessId, withDeleted ? null : false), ...(ids.length ? { id: { in: ids } } : {}) },
+    where: { ...myStatements(u.id, m.businessId, m.role, withDeleted ? null : false), ...(ids.length ? { id: { in: ids } } : {}) },
     include: { file: true, account: true, layoutVersion: { include: { layout: true } } },
     orderBy: { periodEnd: 'asc' }
   });

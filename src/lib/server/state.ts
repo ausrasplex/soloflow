@@ -6,6 +6,7 @@ import { currentMembership, type CurrentUser } from './auth';
 import { APP_VERSION, backupSettings, dirSize, folderPath, freeSpace } from './backup';
 import { categorize } from './categorize';
 import { DAY, num, today0 } from './util';
+import { ROLE_DEFAULT, ROLE_LOCKED, seesAccount, visibleAccounts } from './access';
 
 const SLOTS = ['a1', 'a2', 'a3'];
 export const initials = (name: string) => { const w = (name || '?').trim().split(/\s+/).filter(Boolean); return ((w.length > 1 ? w[0][0] + w[w.length - 1][0] : (w[0] || '?').slice(0, 2)) || '?').toUpperCase(); };
@@ -38,11 +39,13 @@ export async function buildState(u: CurrentUser) {
 
   // ----- accounts you can see
   const acctRows = await db.account.findMany({
-    where: { businessId: bid, deletedAt: null, holders: { some: { userId: u.id } } },
-    include: { bank: true, holders: { include: { user: true } }, statements: { where: { deletedAt: null }, orderBy: { periodEnd: 'asc' }, include: { txns: { orderBy: [{ date: 'asc' }, { row: 'asc' }] } } } },
+    where: { businessId: bid, deletedAt: null, ...visibleAccounts(u.id, m.role) },
+    include: { bank: true, access: true, statements: { where: { deletedAt: null }, orderBy: { periodEnd: 'asc' }, include: { txns: { orderBy: [{ date: 'asc' }, { row: 'asc' }] } } } },
     orderBy: { createdAt: 'asc' }
   });
-  const hiddenAccts = await db.account.findMany({ where: { businessId: bid, deletedAt: null, NOT: { holders: { some: { userId: u.id } } } }, select: { bankId: true, closedAt: true } });
+  const seen = new Set(acctRows.map((a) => a.id));
+  const hiddenAccts = (await db.account.findMany({ where: { businessId: bid, deletedAt: null }, select: { id: true, bankId: true, closedAt: true } })).filter((a) => !seen.has(a.id));
+  const live = mems.filter((x) => !x.removedAt);
 
   const acctBalance = (a: (typeof acctRows)[number]) => {
     const st = a.statements[a.statements.length - 1];
@@ -70,10 +73,17 @@ export async function buildState(u: CurrentUser) {
     txns.filter((t) => t.date >= since && num(t.debit) > 0).forEach((t) => { const c = t.category || categorize(t.description, 0); if (c === 'Transfers' || c === 'Tax payments') return; cat[c] = (cat[c] || 0) + num(t.debit); });
     const cats = Object.entries(cat).sort((x, y) => y[1] - x[1]).map(([k, v]) => [k, Math.round(v)]);
     const recent = txns.slice(-6).reverse().map((t) => [Math.max(0, Math.round((+now - +t.date) / DAY)), t.description, num(t.credit) - num(t.debit), t.category || categorize(t.description, num(t.credit))]);
-    const holderNames = a.holders.map((h) => h.user.displayName);
+    // each current member's switch on this account: their role's default unless the account sets it
+    const access = live.map((x) => {
+      const row = a.access.find((r) => r.userId === x.userId);
+      return { id: x.userId, name: x.user.displayName, ini: initials(x.user.displayName), slot: slotOf[x.userId] || 'a1', photo: x.user.photo || '', you: x.userId === u.id,
+        role: ROLE[x.role], on: seesAccount(x.role, row?.allowed), locked: ROLE_LOCKED[x.role], byDefault: ROLE_LOCKED[x.role] || !row, roleDefault: ROLE_DEFAULT[x.role] };
+    });
+    const holders = access.filter((p) => p.on);
+    const holderNames = holders.map((h) => h.name);
     return {
       id: a.id, name: a.name, bankId: a.bankId, bank: a.bank.name, type: a.type, card: a.type === 'Credit card',
-      holders: a.holders.map((h) => h.userId), holderPeople: a.holders.map((h) => ({ id: h.userId, name: h.user.displayName, ini: initials(h.user.displayName), slot: slotOf[h.userId] || 'a1' })),
+      holders: holders.map((h) => h.id), holderPeople: holders.map((h) => ({ id: h.id, name: h.name, ini: h.ini, slot: h.slot })), access,
       slot: SLOTS[i % 3], initial: (a.name || '?').charAt(0).toUpperCase(),
       bsb: dec(a.bsb), num: dec(a.number), holder: a.nameOnAccount || holderNames.join(' and '),
       balance: bal, hist, inc, exp, cats, tx: recent, statementCount: a.statements.length,

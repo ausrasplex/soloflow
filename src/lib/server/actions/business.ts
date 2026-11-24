@@ -1,6 +1,7 @@
 // Business settings: name, ABN and GST details, members and their roles, invites, deleting the business.
 import { type Action, type Ctx, biz, canManage, db, need, str } from '../actions';
 import { token } from '../crypto';
+import { seesAccount } from '../access';
 
 const ROLES: Record<string, 'OWNER' | 'EDITOR' | 'VIEWER'> = { Owner: 'OWNER', Editor: 'EDITOR', Viewer: 'VIEWER', OWNER: 'OWNER', EDITOR: 'EDITOR', VIEWER: 'VIEWER' };
 const WORD: Record<string, string> = { OWNER: 'an owner', EDITOR: 'an editor', VIEWER: 'a viewer' };
@@ -86,8 +87,8 @@ export const businessActions: Record<string, Action> = {
   deleteBusiness: async (c) => {
     canManage(c);
     const bid = biz(c);
-    const accts = await db.account.findMany({ where: { businessId: bid, deletedAt: null, closedAt: null }, include: { holders: true } });
-    const visible = accts.filter((a) => a.holders.some((h) => h.userId === c.u.id)).map((a) => a.name);
+    const accts = await db.account.findMany({ where: { businessId: bid, deletedAt: null, closedAt: null }, include: { access: { where: { userId: c.u.id } } } });
+    const visible = accts.filter((a) => seesAccount(c.m!.role, a.access[0]?.allowed)).map((a) => a.name);
     const hidden = accts.length - visible.length;
     if (visible.length || hidden) return { blocked: true, visible, hidden: hidden > 0 };
     const row = await db.business.findUnique({ where: { id: bid } });

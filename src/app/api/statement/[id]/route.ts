@@ -12,7 +12,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const { m } = await currentMembership(u);
   if (!m) return Response.json({ error: 'Not found' }, { status: 404 });
   const { id } = await ctx.params;
-  const s = await db.statement.findFirst({ where: { id, ...myStatements(u.id, m.businessId, null) }, include: { txns: { orderBy: [{ page: 'asc' }, { row: 'asc' }, { date: 'asc' }] } } });
+  const s = await db.statement.findFirst({ where: { id, ...myStatements(u.id, m.businessId, m.role, null) }, include: { txns: { orderBy: [{ page: 'asc' }, { row: 'asc' }, { date: 'asc' }] } } });
   if (!s) return Response.json({ error: 'Not found' }, { status: 404 });
   return Response.json({
     id: s.id,

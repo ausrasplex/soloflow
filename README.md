@@ -73,7 +73,7 @@ npm start
 - **Settings** holds the business, invites (with a QR code), alerts and where they go (Discord, Telegram, ntfy, Gotify, Home Assistant or a webhook), banks, layouts, your data export and, for the admin, backups.
 - **Profile** holds your name, photo, sign-in email, password, two-step verification and signed-in devices.
 
-Who sees what: an account and its statements are visible only to its holders. Banks are shared in a business, and layouts are shared on the whole server. Shared things never reveal accounts you are not on. One person can belong to several businesses, for example a bookkeeper helping more than one sole trader.
+Who sees what: owners see every account. Editors (a bookkeeper, say) see accounts unless an account switches them off, and viewers (an accountant, say) see only the accounts switched on for them. Owners change the switches on each account's page, under Who Can See It. Banks are shared in a business, and layouts are shared on the whole server. Shared things never reveal accounts you are not on. One person can belong to several businesses, for example a bookkeeper helping more than one sole trader.
 
 ## Backups
 

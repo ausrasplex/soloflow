@@ -2,19 +2,21 @@
 import { Prisma } from '@prisma/client';
 import { db } from './db';
 import { categorize } from './categorize';
+import type { Role } from '@prisma/client';
 import { matchFile, type Read } from './importer';
+import { visibleAccounts } from './access';
 
 /** Credit cards take card layouts; every other account takes account layouts. */
 export const kindOf = (type: string) => (type === 'Credit card' ? 'card' : 'account');
 
 /** Accounts the person can import into. */
-export async function destinations(userId: string, businessId: string) {
-  const accts = await db.account.findMany({ where: { businessId, deletedAt: null, closedAt: null, holders: { some: { userId } } }, include: { bank: true }, orderBy: { createdAt: 'asc' } });
+export async function destinations(userId: string, businessId: string, role: Role) {
+  const accts = await db.account.findMany({ where: { businessId, deletedAt: null, closedAt: null, ...visibleAccounts(userId, role) }, include: { bank: true }, orderBy: { createdAt: 'asc' } });
   return accts.map((a) => ({ id: a.id, name: a.name, bank: a.bank.name, kind: kindOf(a.type), label: a.type === 'Credit card' ? 'Credit card' : 'Account' }));
 }
 
-export async function guessDest(userId: string, businessId: string, bankName: string | null, kind: string | null, read: Read | null) {
-  const all = await destinations(userId, businessId);
+export async function guessDest(userId: string, businessId: string, role: Role, bankName: string | null, kind: string | null, read: Read | null) {
+  const all = await destinations(userId, businessId, role);
   const c = all.filter((d) => (!bankName || d.bank.toLowerCase() === bankName.toLowerCase()) && (!kind || d.kind === kind));
   if (c.length > 1 && read && read.period) {
     // an account that already has this exact period wins (the duplicate is then reported); otherwise the one whose latest statement ends just before this one starts
@@ -31,10 +33,10 @@ export async function guessDest(userId: string, businessId: string, bankName: st
   return c[0]?.id || '';
 }
 
-export async function saveImport(o: { fileId: string; destId: string; userId: string; businessId: string }) {
+export async function saveImport(o: { fileId: string; destId: string; userId: string; businessId: string; role: Role }) {
   const file = await db.storedFile.findUnique({ where: { id: o.fileId } });
   if (!file || !file.pending || (file.pending as { businessId?: string }).businessId !== o.businessId) throw new Error('That file is not waiting to be imported.');
-  const dests = await destinations(o.userId, o.businessId);
+  const dests = await destinations(o.userId, o.businessId, o.role);
   const dest = dests.find((d) => d.id === o.destId);
   if (!dest) throw new Error('Choose an account you can see.');
   const m = await matchFile(Buffer.from(file.data), file.name, file.mime, (file.pending as { versionId?: string }).versionId || null);
