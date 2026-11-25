@@ -51,17 +51,21 @@ export function BusinessSwitch({ style, chevron }) {
   const d = ctx.data || {};
   const all = d.businesses || [];
   return (
-    <span style={{ position: 'relative', display: 'inline-flex' }}>
-      <button className="hbs" type="button" style={style} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>{(d.business && d.business.name) || 'Business'} {chevron}</button>
+    <span style={{ position: 'relative', display: 'inline-flex', flex: '0 1 auto', minWidth: 0 }}>
+      {/* a long name stays on one line and ends in an ellipsis; the full name is in the tooltip and the menu */}
+      <button className="hbs" type="button" style={Object.assign({}, style, { minWidth: 0, maxWidth: '100%' })} title={(d.business && d.business.name) || undefined} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(d.business && d.business.name) || 'Business'}</span>
+        <span style={{ flex: 'none', display: 'inline-flex' }}>{chevron}</span>
+      </button>
       {open ? (
         <>
           <span onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
-          <span role="menu" style={{ position: 'absolute', top: 50, left: 0, zIndex: 50, minWidth: 260, background: 'var(--surface)', color: 'var(--ink)', border: '1px solid var(--line)', borderRadius: 20, padding: 8, boxShadow: '0 12px 32px rgba(0,0,0,.18)', display: 'flex', flexDirection: 'column' }}>
+          <span role="menu" className="bizmenu" style={{ position: 'absolute', top: 50, left: 0, zIndex: 50, minWidth: 260, maxWidth: 'min(360px, calc(100vw - 32px))', background: 'var(--surface)', color: 'var(--ink)', border: '1px solid var(--line)', borderRadius: 20, padding: 8, boxShadow: '0 12px 32px rgba(0,0,0,.18)', display: 'flex', flexDirection: 'column' }}>
             <span style={{ padding: '8px 12px 4px', fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>Your businesses</span>
             {all.map((h) => (
               <button key={h.id} type="button" role="menuitemradio" aria-checked={h.current} className="bizopt" onClick={async () => { setOpen(false); if (!h.current) { await ctx.act('switchBusiness', { id: h.id }); window.location.reload(); } }}
                 style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 44, padding: '0 12px', border: 0, borderRadius: 12, background: h.current ? 'var(--surface2)' : 'transparent', color: 'var(--ink)', font: 'inherit', fontSize: 14, fontWeight: 600, textAlign: 'left', cursor: 'pointer' }}>
-                <span style={{ flex: 1 }}>{h.name}</span><span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 500 }}>{h.role}</span>
+                <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.name}</span><span style={{ flex: 'none', fontSize: 12, color: 'var(--muted)', fontWeight: 500 }}>{h.role}</span>
               </button>
             ))}
             <a href="/settings" style={{ display: 'flex', alignItems: 'center', minHeight: 44, padding: '0 12px', borderRadius: 12, fontSize: 14, fontWeight: 600, color: 'var(--ink)', textDecoration: 'none', borderTop: '1px solid var(--line)', marginTop: 4 }}>Business settings</a>
