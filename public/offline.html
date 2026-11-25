@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f1f1f4">
+<title>SoloFlow is offline</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:#f1f1f4;color:#2b2849;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .card{max-width:420px;background:#fff;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 30px rgba(43,40,73,.08)}
+  .tile{width:56px;height:56px;border-radius:16px;background:#160F42;display:flex;align-items:center;justify-content:center}
+  h1{margin:0;font-size:22px}
+  p{margin:0;color:#6b6985;font-size:14px;line-height:1.5}
+  button{align-self:flex-start;min-height:48px;padding:0 22px;border:0;border-radius:999px;background:#2b2849;color:#fff;font:700 14px inherit;font-family:inherit;cursor:pointer}
+  @media (prefers-color-scheme:dark){body{background:#14122a;color:#ecebf5}.card{background:#1e1b38;box-shadow:none}p{color:#a9a6c4}button{background:#b8a5fa;color:#14122a}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="tile"><img src="/icon.svg" alt="" width="56" height="56" style="border-radius:16px"></div>
+    <h1>Can't Reach SoloFlow</h1>
+    <p>Your server isn't answering. Check that you're on your home network or VPN and that the SoloFlow container is running, then try again.</p>
+    <button onclick="location.reload()">Try again</button>
+  </div>
+</body>
+</html>

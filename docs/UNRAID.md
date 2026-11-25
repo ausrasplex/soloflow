@@ -59,6 +59,37 @@ The template runs the container as Unraid's `nobody:users` (99:100), so backups 
 Open the WebUI. The first visit asks you to make the admin account and your business. Then add your banks and
 accounts, and import statements.
 
+## Installing It as an App
+
+SoloFlow can be installed as its own app (its own window and icon, no address bar or tabs) on a computer, an Android
+phone or an iPhone. Browsers only allow a real install from an HTTPS address. From a plain `http://` address, Chrome's
+"Install" only makes a shortcut that opens in a normal browser window, with the address bar still showing.
+
+Give SoloFlow an HTTPS address in one of these ways:
+
+- **Tailscale (easiest):** install the Tailscale plugin on Unraid, turn on MagicDNS and HTTPS certificates in the
+  Tailscale admin console, then run `tailscale serve --bg 3000` on Unraid. SoloFlow is then at
+  `https://tower.your-tailnet.ts.net` on every device in your tailnet, at home or away.
+- **A reverse proxy:** Nginx Proxy Manager or SWAG with your own domain and a Let's Encrypt certificate (the DNS
+  challenge works for addresses only used at home).
+
+Then set **Address** to the HTTPS address and **Secure cookies** to `true` in the template, and apply.
+
+To install:
+- **Chrome or Edge on a computer:** open the HTTPS address, then the install icon at the right of the address bar
+  (or the menu, **Cast, save and share > Install page as app**).
+- **Android (Chrome):** menu, **Add to home screen > Install**.
+- **iPhone or iPad (Safari):** Share, **Add to Home Screen**.
+
+If you installed SoloFlow from an `http://` address before, uninstall that copy first, then install from the HTTPS
+address.
+
+For a quick test on one computer only, Chrome can treat one `http://` address as secure: open
+`chrome://flags/#unsafely-treat-insecure-origin-as-secure`, add `http://YOUR-UNRAID-IP:3000`, and restart Chrome.
+
+The installed app never stores your statements or figures on the device. It keeps only icons and the app's code, and
+shows a "Can't Reach SoloFlow" page when the server is unreachable.
+
 ## Updating
 
 Docker tab, **Check for Updates**, then **Apply Update**. Migrations run when the container starts.
